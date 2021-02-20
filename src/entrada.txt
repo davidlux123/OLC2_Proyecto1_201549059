@@ -1,0 +1,7 @@
+program holis; 
+
+begin 
+
+writeln('holaaaaaa mundo');
+
+end.

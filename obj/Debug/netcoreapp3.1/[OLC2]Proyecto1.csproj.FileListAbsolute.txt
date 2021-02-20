@@ -1,0 +1,17 @@
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.exe
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.deps.json
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.runtimeconfig.json
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.runtimeconfig.dev.json
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.dll
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\[OLC2]Proyecto1.pdb
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.csprojAssemblyReference.cache
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\_OLC2_Proyecto1.Form1.resources
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.csproj.GenerateResource.cache
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.AssemblyInfoInputs.cache
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.AssemblyInfo.cs
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.csproj.CoreCompileInputs.cache
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.dll
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.pdb
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.genruntimeconfig.cache
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\bin\Debug\netcoreapp3.1\Irony.dll
+C:\Users\David Lux\Desktop\OLC2\Proyecto1\[OLC2]Proyecto1\obj\Debug\netcoreapp3.1\[OLC2]Proyecto1.csproj.CopyComplete
