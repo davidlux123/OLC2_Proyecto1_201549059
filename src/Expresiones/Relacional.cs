@@ -1,4 +1,5 @@
-﻿using _OLC2_Proyecto1.src.Interfaces;
+﻿using _OLC2_Proyecto1.src.Ambientes;
+using _OLC2_Proyecto1.src.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -36,123 +37,125 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.simbolo = simbolo;
         }
 
-        public retorno execute()
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            resultado.value = null;
-            resultado.type = tiposPrimitivos.error;
+            retorno valorIzq = this.hijoIzq.execute(ent, programClass);
+            retorno valorDer = this.hijoDer.execute(ent, programClass);
 
-            retorno valorIzq = this.hijoIzq.execute();
-            retorno valorDer = this.hijoDer.execute();
-
-            if (valorIzq.type != tiposPrimitivos.error && valorIzq.value != null && valorDer.type != tiposPrimitivos.error && valorDer.value != null)
+            if (valorIzq.type == valorDer.type && this.type == opcionRelacional.IGUAL)
             {
-                if (valorIzq.type == valorDer.type && this.type == opcionRelacional.IGUAL)
+                if (valorIzq.value == valorDer.value)
                 {
-                    if (valorIzq.value == valorDer.value)
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)true;
-                    }
-                    else
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)false;
-                    }
-
-                }
-                else if (valorIzq.type == valorDer.type && this.type == opcionRelacional.DIFERENCIACION)
-                {
-                    if (valorIzq.value != valorDer.value)
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)true;
-                    }
-                    else
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)false;
-                    }
-
-                }
-                else if ((valorIzq.type == tiposPrimitivos.REAL || valorIzq.type == tiposPrimitivos.INT) &&
-                         (valorDer.type == tiposPrimitivos.INT || valorDer.type == tiposPrimitivos.REAL))
-                {
-                    if (valorIzq.type == tiposPrimitivos.INT)
-                        valorIzq.value = float.Parse(valorIzq.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
-                        if (valorDer.type == tiposPrimitivos.INT)
-                            valorDer.value = float.Parse(valorDer.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
-                    else if (valorDer.type == tiposPrimitivos.INT)
-                        valorDer.value = float.Parse(valorDer.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
-
-                    if (this.type == opcionRelacional.MENOR)
-                    {
-                        if ((float)valorIzq.value < (float)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
-
-                    }
-                    else if (this.type == opcionRelacional.MENORIGUAL)
-                    {
-                        if ((float)valorIzq.value <= (float)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
-                    }
-                    else if (this.type == opcionRelacional.MAYOR)
-                    {
-                        if ((float)valorIzq.value > (float)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
-
-                    }
-                    else //sí, this.type == opcionRelacional.MAYORIGUAL
-                    {
-                        if ((float)valorIzq.value >= (float)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
-
-                    }
-
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)true;
                 }
                 else
                 {
-                    //error que no se puede bool > bool
-                    resultado.type = tiposPrimitivos.error;
-                    resultado.value = null;
-                    Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
-                    " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)false;
+                }
+
+            }
+            else if (valorIzq.type == valorDer.type && this.type == opcionRelacional.DIFERENCIACION)
+            {
+                if (valorIzq.value != valorDer.value)
+                {
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)true;
+                }
+                else
+                {
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)false;
+                }
+
+            }
+            else if ((valorIzq.type == tiposPrimitivos.REAL || valorIzq.type == tiposPrimitivos.INT) &&
+                     (valorDer.type == tiposPrimitivos.INT || valorDer.type == tiposPrimitivos.REAL))
+            {
+                if (valorIzq.type == tiposPrimitivos.INT)
+                {
+                    valorIzq.value = float.Parse(valorIzq.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
+                    if (valorDer.type == tiposPrimitivos.INT)
+                        valorDer.value = float.Parse(valorDer.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
+                }
+                else if (valorDer.type == tiposPrimitivos.INT)
+                {
+                    valorDer.value = float.Parse(valorDer.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
+                }
+
+                if (this.type == opcionRelacional.MENOR)
+                {
+                    if ((float)valorIzq.value < (float)valorDer.value)
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
+                    }
+                    else
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
+                    }
 
                 }
+                else if (this.type == opcionRelacional.MENORIGUAL)
+                {
+                    if ((float)valorIzq.value <= (float)valorDer.value)
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
+                    }
+                    else
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
+                    }
+                }
+                else if (this.type == opcionRelacional.MAYOR)
+                {
+                    if ((float)valorIzq.value > (float)valorDer.value)
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
+                    }
+                    else
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
+                    }
+
+                }
+                else //sí, this.type == opcionRelacional.MAYORIGUAL
+                {
+                    if ((float)valorIzq.value >= (float)valorDer.value)
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
+                    }
+                    else
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
+                    }
+
+                }
+
             }
-            
+            else
+            {
+                resultado.type = tiposPrimitivos.error;
+                resultado.value = null;
+                Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
+                " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
+
+                throw new Exception("<tr>\n" +
+                "\t<td>Error Semantico</td>\n" +
+                "\t<td>" + "No se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + " </td>\n" +
+                "\t<td>" + this.line + "</td>\n" +
+                "\t<td>" + this.column + "</td>\n</tr>");
+
+            }
 
             return resultado;
         }

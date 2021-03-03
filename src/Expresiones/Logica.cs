@@ -1,4 +1,5 @@
-﻿using _OLC2_Proyecto1.src.Interfaces;
+﻿using _OLC2_Proyecto1.src.Ambientes;
+using _OLC2_Proyecto1.src.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -31,56 +32,56 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.simbolo = simbolo;
         }
 
-        public retorno execute()
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            resultado.value = null;
-            resultado.type = tiposPrimitivos.error;
+            retorno valorIzq = this.hijoIzq.execute(ent, programClass);
+            retorno valorDer = this.hijoDer.execute(ent, programClass);
 
-            retorno valorIzq = this.hijoIzq.execute();
-            retorno valorDer = this.hijoDer.execute();
-
-            if (valorIzq.type != tiposPrimitivos.error && valorIzq.value != null && valorDer.type != tiposPrimitivos.error && valorDer.value != null)
+            if (valorIzq.type == tiposPrimitivos.BOOLEAN && valorDer.type == tiposPrimitivos.BOOLEAN)
             {
-                if (valorIzq.type == tiposPrimitivos.BOOLEAN && valorDer.type == tiposPrimitivos.BOOLEAN)
+                if (this.type == opcionLogica.AND)
                 {
-                    if (this.type == opcionLogica.AND)
+                    if ((bool)valorIzq.value && (bool)valorDer.value)
                     {
-                        if ((bool)valorIzq.value && (bool)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
-
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
                     }
-                    else //sí, this.type == opcionLogica.OR
+                    else
                     {
-                        if ((bool)valorIzq.value || (bool)valorDer.value)
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)true;
-                        }
-                        else
-                        {
-                            resultado.type = tiposPrimitivos.BOOLEAN;
-                            resultado.value = (bool)false;
-                        }
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
                     }
 
                 }
-                else
+                else //sí, this.type == opcionLogica.OR
                 {
-                    //los tipos de valores no son bools
-                    resultado.type = tiposPrimitivos.error;
-                    resultado.value = null;
-                    Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
-                    " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
+                    if ((bool)valorIzq.value || (bool)valorDer.value)
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)true;
+                    }
+                    else
+                    {
+                        resultado.type = tiposPrimitivos.BOOLEAN;
+                        resultado.value = (bool)false;
+                    }
                 }
+
+            }
+            else
+            {
+                resultado.type = tiposPrimitivos.error;
+                resultado.value = null;
+                Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
+                " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
+
+                throw new Exception("<tr>\n" +
+                "\t<td>Error Semantico</td>\n" +
+                "\t<td>" + "No se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + " </td>\n" +
+                "\t<td>" + this.line + "</td>\n" +
+                "\t<td>" + this.column + "</td>\n</tr>");
+
             }
 
             return resultado;
@@ -100,37 +101,38 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.hijo = hijo;
         }
 
-        public retorno execute()
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            resultado.value = null;
-            resultado.type = tiposPrimitivos.error;
+            retorno valorHijo = this.hijo.execute(ent, programClass);
 
-            retorno valorHijo = this.hijo.execute();
-
-            if (valorHijo.value != null && valorHijo.type != tiposPrimitivos.error)
+            if (valorHijo.type == tiposPrimitivos.BOOLEAN)
             {
-                if (valorHijo.type == tiposPrimitivos.BOOLEAN)
+                if ((bool)valorHijo.value)
                 {
-                    if ((bool)valorHijo.value)
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)false;
-                    }
-                    else //sí 
-                    {
-                        resultado.type = tiposPrimitivos.BOOLEAN;
-                        resultado.value = (bool)true;
-                    }
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)false;
                 }
-                else
+                else //sí 
                 {
-                    //ERROR DE TIPOS
-                    resultado.type = tiposPrimitivos.error;
-                    resultado.value = null;
-                    Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
-                    " Descrip: el tipo debe ser Boolean" + "\n");
+                    resultado.type = tiposPrimitivos.BOOLEAN;
+                    resultado.value = (bool)true;
                 }
+            }
+            else
+            {
+                //ERROR DE TIPOS
+                resultado.type = tiposPrimitivos.error;
+                resultado.value = null;
+                Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
+                "Descrip: El tipo de la expresion '" + valorHijo.value.ToString() + "' debe ser Booleano " + "\n");
+
+                throw new Exception("<tr>\n" +
+                "\t<td>Error Semantico</td>\n" +
+                "\t<td>" + "El tipo de la expresion '" + valorHijo.value.ToString() + "' debe ser Booleano " + "</td>\n" +
+                "\t<td>" + this.line + "</td>\n" +
+                "\t<td>" + this.column + "</td>\n</tr>");
+
             }
 
             return resultado;

@@ -1,4 +1,5 @@
 ﻿using _OLC2_Proyecto1.src;
+using _OLC2_Proyecto1.src.Ambientes;
 using _OLC2_Proyecto1.src.Gramatica;
 using _OLC2_Proyecto1.src.Interfaces;
 using Irony;
@@ -18,7 +19,8 @@ namespace _OLC2_Proyecto1
 {
     public partial class Form1 : Form
     {
-        private String ruta;
+        private string ruta;
+        private GeneradorAST generadorAst;
 
         public Form1()
         {
@@ -111,54 +113,111 @@ namespace _OLC2_Proyecto1
                 Gramatica grammar = new Gramatica();
                 LanguageData lenguaje = new LanguageData(grammar);
                 Parser parser = new Parser(lenguaje);
-                ParseTree arbol = parser.Parse(editorRichText.Text);
+                ParseTree arbolIrony = parser.Parse(editorRichText.Text);
 
-                if (arbol.ParserMessages.Count == 0)
+                List<string> ErroresLexSynt = new List<string>();
+                if (arbolIrony.ParserMessages.Count != 0)
+                    MessageBox.Show("encontraron errores lexico-sintacticos en la entrada");
+                foreach (LogMessage error in arbolIrony.ParserMessages)
                 {
-                    GeneradorAST generadorAst = new GeneradorAST(arbol);//Se construye el AST pormedio del arbol que devuelve Irony
-                    
-                    //generadorAst.generarASTdot();//Se grafica el arbol que devuelve irony 
+                    if (error.Message.Contains("Syntax"))
+                    {
+                        ErroresLexSynt.Add("<tr>\n" +
+                        "\t<td>" + "Error Sintactico" + " </td>\n" +
+                        "\t<td>" + error.Message.Replace("Syntax error, expected", "Se esperaba ") + "</td>\n" +
+                        "\t<td>" + (error.Location.Line + 1) + "</td>\n" +
+                        "\t<td>" + (error.Location.Column + 1) + "</td>\n" +
+                        "</tr>\n\n");
 
-                    AST ast = generadorAst.ast;
-
-                    if (ast != null)
-                        foreach (Instruccion ins in ast.Instrucciones)
-                            ins.execute();
+                        ConsoleRichText.Text += " Error Sintactico: line: " + (error.Location.Line + 1) + " column: " + (error.Location.Column + 1) +
+                        error.Message.Replace("Syntax error, expected:", ", Se esperaba un ") + "\n";
+                    }
                     else
-                        ConsoleRichText.Text = "Error panic: no se pudo generar el AST :(";
+                    {
+                        ErroresLexSynt.Add("<tr>\n" +
+                        "\t<td>" + "Error Lexico" + " </td>\n" +
+                        "\t<td>" + error.Message.Replace("Invalid character", "Caracter invalido") + "</td>\n" +
+                        "\t<td>" + (error.Location.Line + 1) + "</td>\n" +
+                        "\t<td>" + (error.Location.Column + 1) + "</td>\n</tr>\n\n");
 
+                        ConsoleRichText.Text += "Error Lexico: line: " + (error.Location.Line + 1) + " column: " + (error.Location.Column + 1) +
+                        error.Message.Replace("Invalid character:", " ,Caracter invalido ") + "\n";
+                    }
                 }
-                else // si se encontraron errores no ejecuta
+
+                this.generadorAst = new GeneradorAST(arbolIrony, ErroresLexSynt);//Se construye el AST pormedio del arbol que devuelve Irony
+                Entorno entGlobal = new Entorno(null,"GLOBAL");
+                ProgramClass programClas = new ProgramClass();
+
+                if (this.generadorAst.Instrucciones != null) 
                 {
-                    MessageBox.Show("No se ah podido ejecutar la entrada ya que se encontraron errores");
-                    List<LogMessage> errores = arbol.ParserMessages;
-                    foreach (LogMessage error in errores)
-                        if (error.Message.Contains("Syntax"))
-                            ConsoleRichText.Text += error.Message.Replace("Syntax error, expected", "Error Sintactico, se esperaba") + " line: " + (error.Location.Line + 1) + " column: " + error.Location.Column + "\n";
-                        else
-                            ConsoleRichText.Text += "Error Lexico: " + error.Message.Replace("Invalid character", "Caracter invalido") + " line: " + (error.Location.Line + 1) + " column: " + error.Location.Column + "\n";
+                    foreach (Instruccion instStruct in this.generadorAst.Structs)//reconoce y guarda los structs
+                    {
+                        try
+                        {
+                            if(instStruct != null)
+                               instStruct.execute(entGlobal, programClas);
+                        }
+                        catch (Exception error)
+                        {
+                            string[] listErrs = error.Message.Split("\n|\n");
+                            foreach (string err in listErrs)
+                                generadorAst.Errores.Add(err);
+                        }
+
+                    }
+                    foreach (Instruccion instProcFunc in this.generadorAst.ProcsFuncs)//reconoce y guarda las las funciones
+                    {  
+                        try
+                        {
+                            if (instProcFunc != null)
+                                instProcFunc.execute(entGlobal, programClas);
+                        }
+                        catch (Exception error)
+                        {
+                            string[] listErrs = error.Message.Split("\n|\n");
+                            foreach (string err in listErrs)
+                                generadorAst.Errores.Add(err);
+                        }
+
+                    }
+                    foreach (Instruccion instruccion in this.generadorAst.Instrucciones)//ejecuta las instruciones del Begin main
+                    {
+                        try
+                        {
+                            if (instruccion != null)
+                                instruccion.execute(entGlobal, programClas);
+                        }
+                        catch (Exception error)
+                        {
+                            string[] listErrs = error.Message.Split("\n|\n");
+                            foreach (string err in listErrs)
+                                generadorAst.Errores.Add(err);
+                        }
+                    }
+
+                    
 
                 }
-
+                else
+                    MessageBox.Show("FATAL ERROR: No se pudo ejecutar las instrucciones de BEGIN-main porque IRONY no devolvio un Sytax Tree ya sea porque " +
+                    "se encontraron errores Lexico-Sintacticos en la entrada y no logro recurperse");
             }
 
         }
 
         private void reportesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (File.Exists("C:\\compiladores2\\AST.jpg"))
+            if (this.generadorAst.arbolIrony.Root != null)
             {
-                string comandoDot = "C:\\compiladores2\\AST.jpg";
-                var comando = string.Format(comandoDot);
-                var procStart = new System.Diagnostics.ProcessStartInfo("cmd", "/C" + comando);
-                var proc = new System.Diagnostics.Process();
-                proc.StartInfo = procStart;
-                proc.Start();
-                proc.WaitForExit();
+                this.generadorAst.generarASTdot();
             }
             else
-                MessageBox.Show("Advertencia: no se creo la imagen del AST");
-
+            {
+                MessageBox.Show("ERROR: No se puede generar el Grafico del AST porque IRONY no devolvio un Sytax Tree ya sea porque " +
+                "se encontraron errores Lexico-Sintacticos en la entrada");
+            }
+            this.generadorAst.generarErrores();
         }
 
         private void traducirToolStripMenuItem_Click(object sender, EventArgs e)

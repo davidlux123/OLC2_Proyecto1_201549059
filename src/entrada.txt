@@ -1,7 +1,9 @@
 program holis; 
 
+var davi : string = 'hola mundo';
+
 begin 
 
-writeln('holaaaaaa mundo');
+writeln(davi);
 
 end.

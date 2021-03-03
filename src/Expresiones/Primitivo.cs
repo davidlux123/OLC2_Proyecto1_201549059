@@ -1,4 +1,5 @@
-﻿using _OLC2_Proyecto1.src.Interfaces;
+﻿using _OLC2_Proyecto1.src.Ambientes;
+using _OLC2_Proyecto1.src.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -29,7 +30,7 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.tipo = tipo;
         }
 
-        public retorno execute()
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
 
