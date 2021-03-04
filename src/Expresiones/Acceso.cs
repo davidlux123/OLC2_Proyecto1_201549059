@@ -35,7 +35,7 @@ namespace _OLC2_Proyecto1.src.Expresiones
             {
                 throw new Exception("<tr>\n" +
                 "\t<td>Error Semantico</td>\n" +
-                "\t<td>El id:'" + this.id + "' no existe</td>\n" +
+                "\t<td>El id: '" + this.id + "' no existe</td>\n" +
                 "\t<td>" + this.line + "</td>\n" +
                 "\t<td>" + this.column + "</td>\n</tr>");
             }

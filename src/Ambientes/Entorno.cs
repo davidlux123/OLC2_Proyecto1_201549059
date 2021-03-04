@@ -2,6 +2,7 @@
 using _OLC2_Proyecto1.src.Interfaces;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Text;
 
 namespace _OLC2_Proyecto1.src.Ambientes
@@ -21,7 +22,7 @@ namespace _OLC2_Proyecto1.src.Ambientes
 
         public void addVariable(object valor, string id, tiposPrimitivos type, int linea, int columna, bool constante)
         { 
-            this.variables.Add(id, new Simbolo(valor, id, type, this.nombreAmbito, linea, columna, constante));
+            this.variables.Add(id, new Simbolo(valor, id, type,  linea, columna, constante));
         }
         public bool existeID(string id)
         {
@@ -62,6 +63,31 @@ namespace _OLC2_Proyecto1.src.Ambientes
                 }
                 Entaux = Entaux.anterior;
             }
+
+        }
+        public string getAllVariables()
+        {
+            string variables = "";
+
+            Entorno entActual = this;
+            while (entActual != null)
+            {
+                foreach (DictionaryEntry var  in this.variables)
+                {
+                    Simbolo variable = (Simbolo)var.Value;
+
+                    variables += "<tr>\n" +
+                    "\t<td>" + variable.id.ToString() + "</td>\n" +
+                    "\t<td>" + variable.type.ToString() + "</td>\n" +
+                    "\t<td>" + this.nombreAmbito + "</td>\n" +
+                    "\t<td>" + variable.linea + "</td>\n" +
+                    "\t<td>" + variable.columna + "</td>\n" +
+                    "</tr>\n\n";
+                }
+                entActual = entActual.anterior;
+            }
+
+            return variables;
 
         }
 

@@ -29,9 +29,9 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             retorno valorExp = expresion.execute(ent, ast);
 
             if (this.writeln)
-                Form1.ConsoleRichText.AppendText(valorExp.value.ToString().Replace("'", "") + "\n");
+                Form1.ConsoleRichText.AppendText(Convert.ToString(valorExp.value, CultureInfo.CreateSpecificCulture("en-US")).Replace("'", "") + "\n");
             else
-                Form1.ConsoleRichText.AppendText(valorExp.value.ToString().Replace("'", ""));
+                Form1.ConsoleRichText.AppendText(Convert.ToString(valorExp.value, CultureInfo.CreateSpecificCulture("en-US")).Replace("'", ""));
             
 
         }

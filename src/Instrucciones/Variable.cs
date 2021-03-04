@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
 
-namespace _OLC2_Proyecto1.src.Instrucciones.InstGlobales
+namespace _OLC2_Proyecto1.src.Instrucciones
 {
     class Variable : Instruccion
     {
@@ -22,9 +22,19 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstGlobales
             this.line = line;
             this.column = column;
             this.ids = ids;
-            this.valor = valor;
             this.tipo = getTipo(tipo);
+            this.valor = valor;
         }
+
+        public Variable(int line, int column, List<string> ids, string tipo)
+        {
+            this.line = line;
+            this.column = column;
+            this.ids = ids;
+            this.tipo = getTipo(tipo);
+            this.valor = null;
+        }
+
 
         public void execute(Entorno ent, ProgramClass programClass)
         {   
@@ -41,7 +51,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstGlobales
                     {
                         errores += "<tr>\n" +
                         "\t<td>Error Semantico</td>\n" +
-                        "\t<td>El id:'" + id + "' ya esta en uso</td>\n" +
+                        "\t<td>El id: '" + id + "' ya esta en uso</td>\n" +
                         "\t<td>" + this.line + "</td>\n" +
                         "\t<td>" + this.column + "</td>\n</tr>\n|\n";
                     } 
@@ -67,7 +77,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstGlobales
                         {
                             throw new Exception("<tr>\n" +
                             "\t<td>Error Semantico</td>\n" +
-                            "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' " + "</td>\n" +
+                            "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' a una variable de tipo '" + this.tipo + "'</td>\n" +
                             "\t<td>" + this.line + "</td>\n" +
                             "\t<td>" + this.column + "</td>\n</tr>\n\n");
                         }
@@ -81,7 +91,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstGlobales
                 {
                     throw new Exception("<tr>\n" +
                     "\t<td>Error Semantico</td>\n" +
-                    "\t<td>El id:'" + ids[0] + "' ya esta en uso</td>\n" +
+                    "\t<td>El id: '" + ids[0] + "' ya esta en uso</td>\n" +
                     "\t<td>" + this.line + "</td>\n" +
                     "\t<td>" + this.column + "</td>\n</tr>\n\n");
                 }

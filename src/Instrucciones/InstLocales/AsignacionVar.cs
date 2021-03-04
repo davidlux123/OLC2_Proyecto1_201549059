@@ -14,7 +14,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
         private string id;
         private Expresion valor;
 
-        public AsignacionVar(string id, Expresion valor, int line, int column)
+        public AsignacionVar(int line, int column, string id, Expresion valor)
         {
             this.line = line;
             this.column = column;
@@ -41,7 +41,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
                     {
                         throw new Exception("<tr>\n" +
                         "\t<td>Error Semantico</td>\n" +
-                        "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' " + "</td>\n" +
+                        "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' a una variable de tipo '" + varCatch.type + "'</td>\n" +
                         "\t<td>" + this.line + "</td>\n" +
                         "\t<td>" + this.column + "</td>\n</tr>");
                     }
@@ -50,7 +50,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
                 {
                     throw new Exception("<tr>\n" +
                     "\t<td>Error Semantico</td>\n" +
-                    "\t<td>No se puede asignar un valor a la variable"+ this.id +" porque es una  constante " + "</td>\n" +
+                    "\t<td>No se puede asignar un valor a la variable '"+ this.id +"' porque es una  constante " + "</td>\n" +
                     "\t<td>" + this.line + "</td>\n" +
                     "\t<td>" + this.column + "</td>\n</tr>");
                 }

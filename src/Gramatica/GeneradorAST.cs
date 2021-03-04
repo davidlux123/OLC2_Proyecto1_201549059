@@ -9,7 +9,7 @@ using System.Globalization;
 using System.Windows.Forms;
 using _OLC2_Proyecto1.src.Instrucciones.InstGlobales;
 using _OLC2_Proyecto1.src.Instrucciones.InstLocales;
-
+using _OLC2_Proyecto1.src.Instrucciones;
 
 namespace _OLC2_Proyecto1.src.Gramatica
 {
@@ -72,18 +72,11 @@ namespace _OLC2_Proyecto1.src.Gramatica
                     object inst = construirNodo(hijo);
 
                     if (inst is List<Instruccion>)
-                    {
                         Instrucciones.AddRange((List<Instruccion>)inst);
-                    }/*
-                    else if (inst is Struct)
-                    {
+                    /*else if (inst is Struct)
                         this.Structs.Add((Instruccion)inst);
-
-                    }
                     else if (inst is Procedimiento || inst is Funcion)
-                    {
-                        this.ProcsFuncs.Add((Instruccion)inst);
-                    }*/
+                        this.ProcsFuncs.Add((Instruccion)inst);*/
 
                 }
 
@@ -116,15 +109,23 @@ namespace _OLC2_Proyecto1.src.Gramatica
             }
             else if (nodeNameIsEqual(actual, "VARIABLE"))
             {
-                if (actual.ChildNodes.Count == 2)
+                if (actual.ChildNodes.Count == 3)
+                {
+                    if (nodeNameIsEqual(actual.ChildNodes[0], "id"))
+                    {
+                        return new Variable(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                        new List<string>() { getLexemeNode(actual.ChildNodes[0]) }, (string)construirNodo(actual.ChildNodes[2]));
+                    }
+                    else
+                    {
+                        return new Variable(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                        (List<string>)construirNodo(actual.ChildNodes[0]), (string)construirNodo(actual.ChildNodes[2]));
+                    }
+                }
+                else if (actual.ChildNodes.Count == 5)
                 {
                     return new Variable(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                        (List<string>)construirNodo(actual.ChildNodes[0]), (string)construirNodo(actual.ChildNodes[1]), null);
-                }
-                else if (actual.ChildNodes.Count == 4)
-                {
-                    return new Variable(actual.ChildNodes[2].Token.Location.Line + 1, actual.ChildNodes[2].Token.Location.Column + 1,
-                        new List<string>() {getLexemeNode(actual.ChildNodes[0])}, (string)construirNodo(actual.ChildNodes[1]), (Expresion)construirNodo(actual.ChildNodes[3]));
+                        new List<string>() {getLexemeNode(actual.ChildNodes[0])}, (string)construirNodo(actual.ChildNodes[2]), (Expresion)construirNodo(actual.ChildNodes[4]));
                 }
             }
             else if (nodeNameIsEqual(actual, "LISTAIDS"))
@@ -148,7 +149,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
                 return construirNodo(actual.ChildNodes[1]);
             }
 
-            /*CONSTRUCCION DE INSTRUCCIONES*/
+            /*CONSTRUCCION DE INSTRUCCIONES LOCALES*/
             else if (nodeNameIsEqual(actual, "INSTSLOCAL"))
             {
                 List<Instruccion> Instrucciones = new List<Instruccion>();
@@ -164,6 +165,15 @@ namespace _OLC2_Proyecto1.src.Gramatica
             {
                 return construirNodo(actual.ChildNodes[0]);
             }
+            else if (nodeNameIsEqual(actual, "TS"))
+            {
+                return new GraficarTS(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1);
+            }
+            else if (nodeNameIsEqual(actual, "ASIG"))
+            {
+                return new AsignacionVar(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                    getLexemeNode(actual.ChildNodes[0]), (Expresion)construirNodo(actual.ChildNodes[2]));
+            }
             else if (nodeNameIsEqual(actual, "WRITE"))
             {
                 bool Writeln = false;
@@ -177,7 +187,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
                     return new Write(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
                          new Primitivo(actual.ChildNodes[0].Token.Location.Line, 1, "", tiposPrimitivos.STRING), Writeln);
             }
-            
+
             /*CONSTRUCCION DE EXPRESIONES*/
             else if (nodeNameIsEqual(actual, "EXP")|| nodeNameIsEqual(actual, "E"))
             {
@@ -277,7 +287,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
                     else if (nodeNameIsEqual(actual.ChildNodes[0], "cadena"))
                         return new Primitivo(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
                             valor, tiposPrimitivos.STRING);
-                    else if (nodeNameIsEqual(actual.ChildNodes[0], "t_true") || nodeNameIsEqual(actual.ChildNodes[0], "t_false"))
+                    else if (nodeNameIsEqual(actual.ChildNodes[0], "true") || nodeNameIsEqual(actual.ChildNodes[0], "false"))
                         return new Primitivo(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
                            bool.Parse(valor), tiposPrimitivos.BOOLEAN);
                     else if (nodeNameIsEqual(actual.ChildNodes[0], "id"))
@@ -383,8 +393,8 @@ namespace _OLC2_Proyecto1.src.Gramatica
 
             "<table border = 1.5 width = 100%>\n" +
             "<head>\n" +
-            "\t<tr bgcolor = blue >\n" +
-            "\t<th>Tipo</th>\n" +
+            "\t<tr bgcolor = red >\n" +
+            "\t\t<th>Tipo</th>\n" +
             "\t\t<th>Descripcion</th>\n" +
             "\t\t<th>Linea</th>\n" +
             "\t\t<th>Columna</th>\n" +

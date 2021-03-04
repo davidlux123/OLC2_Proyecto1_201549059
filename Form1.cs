@@ -115,6 +115,7 @@ namespace _OLC2_Proyecto1
                 Parser parser = new Parser(lenguaje);
                 ParseTree arbolIrony = parser.Parse(editorRichText.Text);
 
+                //ERRORES LEXICO-SINTACTICOS
                 List<string> ErroresLexSynt = new List<string>();
                 if (arbolIrony.ParserMessages.Count != 0)
                     MessageBox.Show("encontraron errores lexico-sintacticos en la entrada");
@@ -145,6 +146,7 @@ namespace _OLC2_Proyecto1
                     }
                 }
 
+                //GENERAR AST
                 this.generadorAst = new GeneradorAST(arbolIrony, ErroresLexSynt);//Se construye el AST pormedio del arbol que devuelve Irony
                 Entorno entGlobal = new Entorno(null,"GLOBAL");
                 ProgramClass programClas = new ProgramClass();
@@ -162,7 +164,8 @@ namespace _OLC2_Proyecto1
                         {
                             string[] listErrs = error.Message.Split("\n|\n");
                             foreach (string err in listErrs)
-                                generadorAst.Errores.Add(err);
+                                if (err != "")
+                                    generadorAst.Errores.Add(err);
                         }
 
                     }
@@ -177,7 +180,8 @@ namespace _OLC2_Proyecto1
                         {
                             string[] listErrs = error.Message.Split("\n|\n");
                             foreach (string err in listErrs)
-                                generadorAst.Errores.Add(err);
+                                if (err != "")
+                                    generadorAst.Errores.Add(err);
                         }
 
                     }
@@ -192,7 +196,9 @@ namespace _OLC2_Proyecto1
                         {
                             string[] listErrs = error.Message.Split("\n|\n");
                             foreach (string err in listErrs)
-                                generadorAst.Errores.Add(err);
+                                if (err != "")
+                                    generadorAst.Errores.Add(err);
+
                         }
                     }
 

@@ -1,9 +1,11 @@
 program holis; 
 
-var davi : string = 'hola mundo';
+var
+	davi : string = 'HolaMundo';
 
 begin 
 
-writeln(davi);
+    writeln(true + 2 + davi);
+	graficar_ts();
 
 end.
