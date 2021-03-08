@@ -6,7 +6,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 
-namespace _OLC2_Proyecto1.src.Instrucciones
+namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
 {
     class GraficarTS : Instruccion
     {

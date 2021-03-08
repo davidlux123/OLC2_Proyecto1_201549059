@@ -118,7 +118,7 @@ namespace _OLC2_Proyecto1
                 //ERRORES LEXICO-SINTACTICOS
                 List<string> ErroresLexSynt = new List<string>();
                 if (arbolIrony.ParserMessages.Count != 0)
-                    MessageBox.Show("encontraron errores lexico-sintacticos en la entrada");
+                    MessageBox.Show("Advertencia: encontraron errores lexico-Sintacticos en la entrada");
                 foreach (LogMessage error in arbolIrony.ParserMessages)
                 {
                     if (error.Message.Contains("Syntax"))
@@ -153,38 +153,6 @@ namespace _OLC2_Proyecto1
 
                 if (this.generadorAst.Instrucciones != null) 
                 {
-                    foreach (Instruccion instStruct in this.generadorAst.Structs)//reconoce y guarda los structs
-                    {
-                        try
-                        {
-                            if(instStruct != null)
-                               instStruct.execute(entGlobal, programClas);
-                        }
-                        catch (Exception error)
-                        {
-                            string[] listErrs = error.Message.Split("\n|\n");
-                            foreach (string err in listErrs)
-                                if (err != "")
-                                    generadorAst.Errores.Add(err);
-                        }
-
-                    }
-                    foreach (Instruccion instProcFunc in this.generadorAst.ProcsFuncs)//reconoce y guarda las las funciones
-                    {  
-                        try
-                        {
-                            if (instProcFunc != null)
-                                instProcFunc.execute(entGlobal, programClas);
-                        }
-                        catch (Exception error)
-                        {
-                            string[] listErrs = error.Message.Split("\n|\n");
-                            foreach (string err in listErrs)
-                                if (err != "")
-                                    generadorAst.Errores.Add(err);
-                        }
-
-                    }
                     foreach (Instruccion instruccion in this.generadorAst.Instrucciones)//ejecuta las instruciones del Begin main
                     {
                         try
@@ -201,13 +169,10 @@ namespace _OLC2_Proyecto1
 
                         }
                     }
-
-                    
-
                 }
                 else
-                    MessageBox.Show("FATAL ERROR: No se pudo ejecutar las instrucciones de BEGIN-main porque IRONY no devolvio un Sytax Tree ya sea porque " +
-                    "se encontraron errores Lexico-Sintacticos en la entrada y no logro recurperse");
+                    MessageBox.Show("ERROR: No se pudo ejecutar las instrucciones de BEGIN-main porque IRONY no devolvio un AST ya sea porque " +
+                    "se encontraron errores FATALES en la entrada y no logro recurperse");
             }
 
         }

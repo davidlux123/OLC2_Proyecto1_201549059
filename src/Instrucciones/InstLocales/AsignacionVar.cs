@@ -22,7 +22,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             this.valor = valor;
         }
 
-        public void execute(Entorno ent, ProgramClass ast)
+        public void execute(Entorno ent, ProgramClass programClass)
         {
             Simbolo varCatch = ent.getVariable(this.id);
 
@@ -30,7 +30,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             {
                 if (!varCatch.constante)//que no sea un aconstante
                 {
-                    retorno resultado = this.valor.execute(ent, ast);
+                    retorno resultado = this.valor.execute(ent, programClass);
 
                     if (varCatch.type == resultado.type) // y que los tipos sean iguales
                     {

@@ -12,6 +12,7 @@ namespace _OLC2_Proyecto1.src.Expresiones
         INT,
         REAL,
         BOOLEAN,
+        STRUCT,
         error
     }
 

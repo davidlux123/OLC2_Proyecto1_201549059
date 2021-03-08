@@ -78,8 +78,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
                     }
                     else
                     {
-                        resultado.type = tiposPrimitivos.error;
-                        resultado.value = null;
                         Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                         "Descrip: no se puede dividir un tipo menor que cero" + "\n");
 
@@ -98,8 +96,8 @@ namespace _OLC2_Proyecto1.src.Expresiones
 
             }
             else if ((valorIzq.type == tiposPrimitivos.INT && valorDer.type == tiposPrimitivos.REAL) ||
-                (valorIzq.type == tiposPrimitivos.REAL && valorDer.type == tiposPrimitivos.INT) ||
-                (valorIzq.type == tiposPrimitivos.REAL && valorDer.type == tiposPrimitivos.REAL))
+            (valorIzq.type == tiposPrimitivos.REAL && valorDer.type == tiposPrimitivos.INT) ||
+            (valorIzq.type == tiposPrimitivos.REAL && valorDer.type == tiposPrimitivos.REAL))
             {
                 if (valorIzq.type == tiposPrimitivos.INT)
                     valorIzq.value = float.Parse(valorIzq.value.ToString(), CultureInfo.GetCultureInfo("en-US"));
@@ -135,8 +133,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
                     }
                     else
                     {
-                        resultado.type = tiposPrimitivos.error;
-                        resultado.value = null;
                         Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                         " Descrip: no se puede dividir un tipo menor que cero" + "\n");
 
@@ -151,8 +147,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
                 }
                 else // para la opcion del Modulo '%'
                 {
-                    resultado.type = tiposPrimitivos.error;
-                    resultado.value = null;
                     Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                     " Descrip: no se puede operar el modulo un tipo " + valorIzq.type.ToString() + " con el tipo " + valorDer.type.ToString() + "\n");
 
@@ -166,8 +160,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
             }
             else 
             {
-                resultado.type = tiposPrimitivos.error;
-                resultado.value = null;
                 Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                 " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
 
@@ -214,8 +206,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
             }
             else
             {
-                resultado.type = tiposPrimitivos.error;
-                resultado.value = null;
                 Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                 "Descrip: El tipo de la expresion '" + valorHijo.value.ToString() + "' debe ser Numerico " + "\n");
 

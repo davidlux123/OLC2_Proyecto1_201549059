@@ -8,16 +8,14 @@ namespace _OLC2_Proyecto1.src.Ambientes
     public class Simbolo
     {
         public object valor { get; set; }
-        public string id { get; set; }
         public tiposPrimitivos type { get; set; }
         public int linea { get; set; }
         public int columna { get; set; }
         public bool constante { get; set; }
 
-        public Simbolo(object valor, string id, tiposPrimitivos type, int linea, int columna, bool constante)
+        public Simbolo(object valor, tiposPrimitivos type, int linea, int columna, bool constante)
         {
             this.valor = valor;
-            this.id = id;
             this.type = type;
             this.linea = linea;
             this.columna = columna;

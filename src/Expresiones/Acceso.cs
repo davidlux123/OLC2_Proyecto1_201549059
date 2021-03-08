@@ -23,12 +23,12 @@ namespace _OLC2_Proyecto1.src.Expresiones
         public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            Simbolo variable = ent.getVariable(this.id);
+            Simbolo variableFind = ent.getVariable(this.id);
 
-            if (variable != null)
+            if (variableFind != null)
             {
-                resultado.value = variable.valor;
-                resultado.type = variable.type;
+                resultado.value = variableFind.valor;
+                resultado.type = variableFind.type;
                 return resultado;
             }
             else

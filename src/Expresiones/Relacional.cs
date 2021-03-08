@@ -144,8 +144,6 @@ namespace _OLC2_Proyecto1.src.Expresiones
             }
             else
             {
-                resultado.type = tiposPrimitivos.error;
-                resultado.value = null;
                 Form1.ConsoleRichText.AppendText("Error semantico: " + "en la fila: " + this.line + " y en la columna: " + this.column +
                 " Descrip: no se puede operar '" + this.simbolo + "' de un tipo " + valorIzq.type.ToString() + " con tipo " + valorDer.type.ToString() + "\n");
 

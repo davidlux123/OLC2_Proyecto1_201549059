@@ -10,7 +10,7 @@ namespace _OLC2_Proyecto1.src.Ambientes
     public class Entorno
     {
         private Entorno anterior;
-        private string nombreAmbito;
+        public string nombreAmbito { get; }
         private Hashtable variables;
 
         public Entorno(Entorno anterior, string nombreAmbito)
@@ -22,20 +22,15 @@ namespace _OLC2_Proyecto1.src.Ambientes
 
         public void addVariable(object valor, string id, tiposPrimitivos type, int linea, int columna, bool constante)
         { 
-            this.variables.Add(id, new Simbolo(valor, id, type,  linea, columna, constante));
-        }
+            this.variables.Add(id, new Simbolo(valor, type,  linea, columna, constante));
+        } 
         public bool existeID(string id)
         {
-            Entorno Entaux = this;
-            while (Entaux != null)
-            {
-                if (Entaux.variables.Contains(id))
-                {
-                    return true;
-                }
-                Entaux = Entaux.anterior;
-            }
-            return false;
+            return this.variables.Contains(id);
+        }
+        public bool isEmptyVars()
+        {
+            return this.variables.Count == 0;
         }
         public Simbolo getVariable(string id)
         {
@@ -72,12 +67,12 @@ namespace _OLC2_Proyecto1.src.Ambientes
             Entorno entActual = this;
             while (entActual != null)
             {
-                foreach (DictionaryEntry var  in this.variables)
+                foreach (DictionaryEntry var in this.variables)
                 {
                     Simbolo variable = (Simbolo)var.Value;
 
                     variables += "<tr>\n" +
-                    "\t<td>" + variable.id.ToString() + "</td>\n" +
+                    "\t<td>" + var.Key + "</td>\n" +
                     "\t<td>" + variable.type.ToString() + "</td>\n" +
                     "\t<td>" + this.nombreAmbito + "</td>\n" +
                     "\t<td>" + variable.linea + "</td>\n" +
@@ -90,6 +85,6 @@ namespace _OLC2_Proyecto1.src.Ambientes
             return variables;
 
         }
-
+       
     }
 }

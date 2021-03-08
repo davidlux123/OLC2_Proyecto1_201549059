@@ -1,11 +1,18 @@
 program holis; 
 
+type humano = object
+		var 
+			no : integer;
+			conyugue : humano;
+	end; 
+
 var
-	davi : string = 'HolaMundo';
+	david : humano;
 
 begin 
 
-    writeln(true + 2 + davi);
+	writeln(david.nombre);
+
 	graficar_ts();
 
 end.
