@@ -24,16 +24,19 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             this.writeln = writeln;
         }
 
-        public void execute(Entorno ent, ProgramClass ast)
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
-            retorno valorExp = expresion.execute(ent, ast);
+            retorno valorExp = expresion.getValorSintetizado(ent, programClass);
 
             if (this.writeln)
                 Form1.ConsoleRichText.AppendText(Convert.ToString(valorExp.value, CultureInfo.CreateSpecificCulture("en-US")).Replace("'", "") + "\n");
             else
                 Form1.ConsoleRichText.AppendText(Convert.ToString(valorExp.value, CultureInfo.CreateSpecificCulture("en-US")).Replace("'", ""));
-            
 
+            retorno ret;
+            ret.value = null;
+            ret.type = tiposPrimitivos.VOID;
+            return ret;
         }
     }
 }

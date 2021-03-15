@@ -13,6 +13,8 @@ namespace _OLC2_Proyecto1.src.Expresiones
         REAL,
         BOOLEAN,
         STRUCT,
+        ARRAEGLO,
+        VOID,
         error
     }
 
@@ -31,7 +33,7 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.tipo = tipo;
         }
 
-        public retorno execute(Entorno ent, ProgramClass programClass)
+        public retorno getValorSintetizado(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
 

@@ -36,11 +36,11 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.simbolo = simbolo;
         }
 
-        public retorno execute(Entorno ent, ProgramClass programClass)
+        public retorno getValorSintetizado(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            retorno valorIzq = this.hijoIzq.execute(ent, programClass);
-            retorno valorDer = this.hijoDer.execute(ent, programClass);
+            retorno valorIzq = this.hijoIzq.getValorSintetizado(ent, programClass);
+            retorno valorDer = this.hijoDer.getValorSintetizado(ent, programClass);
 
             if ((valorIzq.type == tiposPrimitivos.STRING || valorDer.type == tiposPrimitivos.STRING) && this.type == opcionAritmetica.SUMAR)
             {
@@ -189,10 +189,10 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.hijo = hijo;
         }
 
-        public retorno execute(Entorno ent, ProgramClass programClass)
+        public retorno getValorSintetizado(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            retorno valorHijo = this.hijo.execute(ent, programClass);
+            retorno valorHijo = this.hijo.getValorSintetizado(ent, programClass);
 
             if (valorHijo.type == tiposPrimitivos.INT)
             {

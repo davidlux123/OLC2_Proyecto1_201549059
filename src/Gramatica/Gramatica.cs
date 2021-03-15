@@ -19,8 +19,10 @@ namespace _OLC2_Proyecto1.src.Gramatica
             //comentarios
             CommentTerminal comentarioUnilinea = new CommentTerminal("comentarioUnilinea", "//", "\n", "\r\n");
             base.NonGrammarTerminals.Add(comentarioUnilinea);
-            CommentTerminal comentarioMultilinea = new CommentTerminal("comentarioMultilinea", "/*", "*/");
+            CommentTerminal comentarioMultilinea = new CommentTerminal("comentarioMultilinea", "(*", "*)");
             base.NonGrammarTerminals.Add(comentarioMultilinea);
+            CommentTerminal comentarioMultilinea2 = new CommentTerminal("comentarioMultilinea", "{", "}");
+            base.NonGrammarTerminals.Add(comentarioMultilinea2);
             #endregion
 
             #region DEFICION DE TERMINALES
@@ -60,7 +62,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
             t_or = ToTerm("or"),
             t_true = ToTerm("true"),
             t_false = ToTerm("false"),
-            t_program = ToTerm("program"),
+            t_program = ToTerm("Program"),
             t_begin = ToTerm("begin"),
             t_end = ToTerm("end"),
             t_integer = ToTerm("integer"),
@@ -72,15 +74,27 @@ namespace _OLC2_Proyecto1.src.Gramatica
             t_type = ToTerm("type"),
             t_object = ToTerm("object"),
             t_array = ToTerm("array"),
-            t_of = ToTerm("of");
+            t_of = ToTerm("of"),
+            t_porc = ToTerm("procedure"),
+            t_func = ToTerm("function"),
+            t_if = ToTerm("if"),
+            t_else = ToTerm("else"),
+            t_then = ToTerm("then"),
+            t_fot = ToTerm("for"),
+            t_while = ToTerm("while"),
+            t_to = ToTerm("to"),
+            t_do = ToTerm("do"),
+            t_repeat = ToTerm("repeat"),
+            t_until = ToTerm("until");
 
 
             #endregion
 
             #region DECLARAR PALABRAS RESERVADAS
             /*PALABRAS RESERVADAS*/
-            MarkReservedWords("write", "writeln", "graficar_ts", "not", "and", "or", "true", "flase", "program", "begin", "end", "integer",
-                "real", "boolean", "string", "var", "const", "type", "object", "array", "of");
+            MarkReservedWords("write", "writeln", "graficar_ts", "not", "and", "or", "true", "flase", "Program", "begin", "end", "integer",
+                "real", "boolean", "string", "var", "const", "type", "object", "array", "of", "procedure", "function", "if", "else", "then",
+                "for","while", "to", "do", "repeat", "until");
             #endregion
 
             #region PRECEDENCIA DE OPERADORES
@@ -102,39 +116,57 @@ namespace _OLC2_Proyecto1.src.Gramatica
             NonTerminal DEFTYPES = new NonTerminal("DEFTYPES");
             NonTerminal DEFTYPE = new NonTerminal("DEFTYPE");
             NonTerminal TYPE = new NonTerminal("TYPE");
+
             NonTerminal ARRAY = new NonTerminal("ARRAY");
             NonTerminal DIMENSIONES = new NonTerminal("DIMENSIONES");
             NonTerminal DIMENSION = new NonTerminal("DIMENSION");
 
-
-
             NonTerminal STRUCT = new NonTerminal("STRUCT");
             NonTerminal VARS_STRUCT = new NonTerminal("VARS_STRUCT");
+            NonTerminal VAR = new NonTerminal("VAR");
+
             NonTerminal DECLARACION = new NonTerminal("DECLARACION");
             NonTerminal CONSTANTES = new NonTerminal("CONSTANTES");
             NonTerminal CONSTANTE = new NonTerminal("CONSTANTE");
             NonTerminal VARIABLES = new NonTerminal("VARIABLES");
             NonTerminal VARIABLE = new NonTerminal("VARIABLE");
-            NonTerminal VAR = new NonTerminal("VAR");
             NonTerminal LISTAIDS = new NonTerminal("LISTAIDS");
             NonTerminal TIPO = new NonTerminal("TIPO");
             NonTerminal BLOQUE = new NonTerminal("BLOQUE");
 
-            //NonTerminal PROCFUNC = new NonTerminal("PROCFUNC");
+            NonTerminal PROCFUNC = new NonTerminal("PROCFUNC");
+            NonTerminal PARAMS = new NonTerminal("PARAMS");
+            NonTerminal PARAM = new NonTerminal("PARAM");
+            NonTerminal DECLARACIONES = new NonTerminal("DECLARACIONES");
 
             NonTerminal INSTSLOCAL = new NonTerminal("INSTSLOCAL");
             NonTerminal INSTLOCAL = new NonTerminal("INSTLOCAL");
             NonTerminal TS = new NonTerminal("TS");
             NonTerminal WRITE = new NonTerminal("WRITE");
             NonTerminal ASIG = new NonTerminal("ASIG");
+            NonTerminal ACCESOS = new NonTerminal("ACCESOS");
+            NonTerminal ACCESO = new NonTerminal("ACCESO");
+            NonTerminal POSICIONES = new NonTerminal("POSICIONES");
+            NonTerminal POSICION = new NonTerminal("POSICION");
+
+            NonTerminal IF = new NonTerminal("IF");
+            NonTerminal ELSIF = new NonTerminal("ELSIF");
+            NonTerminal LIST_ELSIF = new NonTerminal("LIST_ELSIF");
+            NonTerminal ELSE = new NonTerminal("ELSE");
+
+            NonTerminal FOR = new NonTerminal("FOR");
+            NonTerminal WHILE = new NonTerminal("WHILE");
+            NonTerminal REPEAT = new NonTerminal("REPEAT");
+
+            NonTerminal LLAMADA = new NonTerminal("LLAMADA");
+            NonTerminal VALSPARAMS = new NonTerminal("VALSPARAMS");
 
             NonTerminal E = new NonTerminal("E");
             NonTerminal E_ARIT = new NonTerminal("E_ARIT");
             NonTerminal E_LOG = new NonTerminal("E_LOG");
             NonTerminal E_REL = new NonTerminal("E_REL");
             NonTerminal LITERAL = new NonTerminal("LITERAL");
-            NonTerminal ACCSESOS = new NonTerminal("ACCSESOS");
-            NonTerminal ACCSESO = new NonTerminal("ACCSESO");
+
 
             NonTerminal EXP = new NonTerminal("EXP");
             NonTerminal EXPARIT = new NonTerminal("EXPARIT");
@@ -142,18 +174,17 @@ namespace _OLC2_Proyecto1.src.Gramatica
             NonTerminal EXPREL = new NonTerminal("EXPREL");
             NonTerminal DATO = new NonTerminal("DATO");
 
-
             #endregion
 
             #region DEFINICION DE GRAMATICA
             //CUERPO DE PROGRAM
             INIT.Rule = t_program + id + pntComa + INSTSGLOBAL + BLOQUE + pnt;
 
-            //                                             INSTRUCCIONES GLOBALES
+            //                                  INSTRUCCIONES GLOBALES
             INSTSGLOBAL.Rule = MakeStarRule(INSTSGLOBAL, INSTGLOBAL);
             INSTGLOBAL.Rule = DECLARACIONTYPE
-                            | DECLARACION;
-            //| PROCFUNC;
+                            | DECLARACION
+                            | PROCFUNC;
 
             /*declaracion de Types*/
             DECLARACIONTYPE.Rule = t_type + DEFTYPES;
@@ -162,22 +193,26 @@ namespace _OLC2_Proyecto1.src.Gramatica
             DEFTYPES.Rule = MakePlusRule(DEFTYPES, DEFTYPE);
             DEFTYPE.Rule = id + igual + TYPE + pntComa;
             DEFTYPE.ErrorRule = SyntaxError + pntComa;
-            TYPE.Rule = STRUCT
-                      | ARRAY
+           
+            TYPE.Rule = ARRAY
+                      | STRUCT
                       | TIPO;
 
-            /*cracion de structs*/
-            STRUCT.Rule = t_object + t_var + VARS_STRUCT + t_end + pntComa;
-            STRUCT.ErrorRule = SyntaxError + pntComa;
-
-            /*declaracion de varables del struct*/
-            VARS_STRUCT.Rule = MakePlusRule(VARS_STRUCT, VAR);
-
+            /*declaracion de ARREGLOS*/
             ARRAY.Rule = t_array + corchIzq + DIMENSIONES + corchDer + t_of + TIPO;
             DIMENSIONES.Rule = MakePlusRule(DIMENSIONES, coma, DIMENSION);
             DIMENSION.Rule = EXP + pnt + pnt + EXP;
 
-            /*lista de declaraciones de constantes y variables*/
+            /*declaracion de STRUCTS*/
+            STRUCT.Rule = t_object + t_var + VARS_STRUCT + t_end;
+
+            /*declaracion de varables del struct*/
+            VARS_STRUCT.Rule = MakePlusRule(VARS_STRUCT, VAR);
+            VAR.Rule = LISTAIDS + dosPnts + TIPO + pntComa
+                     | LISTAIDS + dosPnts + ARRAY + pntComa;
+
+
+            /*lista de declaraciones de CONSTANTES y ARREGLOS*/
             DECLARACION.Rule = t_const + CONSTANTES
                              | t_var + VARIABLES;
 
@@ -189,13 +224,13 @@ namespace _OLC2_Proyecto1.src.Gramatica
             /*declaracion de varables CON Y SIN ASIGNACION*/
             VARIABLES.Rule = MakePlusRule(VARIABLES, VARIABLE);
             VARIABLE.Rule = id + dosPnts + TIPO + igual + EXP + pntComa
-                          | VAR;
+                          | id + dosPnts + TIPO + pntComa
+                          | id + dosPnts + ARRAY + pntComa
+                          | LISTAIDS + dosPnts + TIPO + pntComa
+                          | LISTAIDS + dosPnts + ARRAY + pntComa; 
             VARIABLE.ErrorRule = SyntaxError + pntComa;
 
-            /*declaracion de varables SIN ASIGANCION*/
-            VAR.Rule = id + dosPnts + TIPO + pntComa
-                     | LISTAIDS + dosPnts + TIPO + pntComa;
-            VARIABLE.ErrorRule = SyntaxError + pntComa;
+            /*LISTADO IDs*/
             LISTAIDS.Rule = MakePlusRule(LISTAIDS, coma, id);
 
             /*deficion de tipos*/
@@ -205,30 +240,72 @@ namespace _OLC2_Proyecto1.src.Gramatica
                       | t_string
                       | id;
 
-            //                              BLOQUE QUE CONTIENE LAS INSTRUCCIONES LOCALES
+            //                                   METODOS Y FUNCIONES
+            PROCFUNC.Rule = t_porc + id + parIzq + PARAMS + parDer + pntComa + DECLARACIONES + BLOQUE + pntComa 
+                          | t_func + id + parIzq + PARAMS + parDer + dosPnts + TIPO + pntComa + DECLARACIONES + BLOQUE + pntComa;
+
+            /*parametros*/
+            PARAMS.Rule = MakeStarRule(PARAMS, coma ,PARAM);
+            PARAM.Rule = LISTAIDS + dosPnts + TIPO
+                       | t_var + id + dosPnts + TIPO;
+
+            /*declaraciones de variables de metodos*/
+            DECLARACIONES.Rule = MakeStarRule(DECLARACIONES, DECLARACION);
+
+            /*'statament bloque de sentencias'*/
             BLOQUE.Rule = t_begin + INSTSLOCAL + t_end;
 
-            //                                       INSTRUCCIONES LOCALES
+            //                                   INSTRUCCIONES LOCALES
             INSTSLOCAL.Rule = MakePlusRule(INSTSLOCAL, INSTLOCAL);
             INSTLOCAL.Rule = WRITE + pntComa
                            | ASIG + pntComa
-                           | TS + pntComa;
+                           | TS + pntComa
+                           | IF
+                           | FOR + pntComa
+                           | WHILE + pntComa
+                           | REPEAT + pntComa
+                           | LLAMADA;
+
             INSTLOCAL.ErrorRule = SyntaxError + pntComa;
 
             /*graficas TS*/
             TS.Rule = t_TS + parIzq + parDer;
-
-            /*asignaciones*/
-            ASIG.Rule = id + asignacion + E 
-                      | id + ACCSESOS + asignacion + E;
-            ACCSESOS.Rule = MakePlusRule(ACCSESOS, ACCSESO);
-            ACCSESO.Rule = pnt + id;
 
             /*write o write*/
             WRITE.Rule = t_write + parIzq + E + parDer
                        | t_writeln + parIzq + E + parDer
                        | t_write + parIzq + parDer
                        | t_writeln + parIzq + parDer;
+
+            /*if*/
+            IF.Rule = t_if + parIzq + E + parDer + t_then + BLOQUE + LIST_ELSIF + ELSE;
+            LIST_ELSIF.Rule = MakeStarRule(LIST_ELSIF, ELSIF);
+            ELSIF.Rule = t_else + t_if + parIzq + E + parDer + t_then + BLOQUE;
+            ELSE.Rule = t_else + BLOQUE
+                      | pntComa;
+            /*for*/
+            FOR.Rule = t_fot + id + asignacion + E + t_to + E + t_do + BLOQUE;
+
+            /*while*/
+            WHILE.Rule = t_while + parIzq + E + parDer + t_do + BLOQUE;
+
+            REPEAT.Rule = t_repeat + BLOQUE + t_until + E;
+
+            /*llamada de metodo*/
+            LLAMADA.Rule = id + parIzq + VALSPARAMS + parDer;
+            VALSPARAMS.Rule = MakeStarRule(VALSPARAMS, coma , E);
+
+
+            /*asignaciones*/
+            ASIG.Rule = ACCESOS + asignacion + E;
+            ACCESOS.Rule = MakeStarRule(ACCESOS, pnt, ACCESO);
+            ACCESO.Rule = id
+                        | id + POSICIONES;
+
+            /*Definicion de posicion de un arreglo*/
+            POSICIONES.Rule = MakePlusRule(POSICIONES, POSICION);
+            POSICION.Rule = corchIzq + E + corchDer;
+
 
             //                                      EXPRESIONES LITERALES
             E.Rule = E_ARIT
@@ -254,8 +331,8 @@ namespace _OLC2_Proyecto1.src.Gramatica
 
             /*Expresiones logicas*/
             E_LOG.Rule = E + t_and + E
-                        | E + t_or + E
-                        | t_not + E;//unaria
+                       | E + t_or + E
+                       | t_not + E;//unaria
 
 
             /*tipo de datos literales para todo tipo de intrucciones locales*/
@@ -266,9 +343,9 @@ namespace _OLC2_Proyecto1.src.Gramatica
                       | t_true
                       | t_false
                       | id
-                      | id + ACCSESOS;
-
-            
+                      | id + POSICIONES
+                      | id + parIzq + VALSPARAMS + parDer
+                      | ACCESOS;
 
             #region EXPRESIONES PRIMITIVAS
 

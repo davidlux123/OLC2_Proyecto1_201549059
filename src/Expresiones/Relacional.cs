@@ -37,11 +37,11 @@ namespace _OLC2_Proyecto1.src.Expresiones
             this.simbolo = simbolo;
         }
 
-        public retorno execute(Entorno ent, ProgramClass programClass)
+        public retorno getValorSintetizado(Entorno ent, ProgramClass programClass)
         {
             retorno resultado;
-            retorno valorIzq = this.hijoIzq.execute(ent, programClass);
-            retorno valorDer = this.hijoDer.execute(ent, programClass);
+            retorno valorIzq = this.hijoIzq.getValorSintetizado(ent, programClass);
+            retorno valorDer = this.hijoDer.getValorSintetizado(ent, programClass);
 
             if (valorIzq.type == valorDer.type && this.type == opcionRelacional.IGUAL)
             {

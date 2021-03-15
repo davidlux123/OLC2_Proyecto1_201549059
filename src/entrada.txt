@@ -1,18 +1,21 @@
-program holis; 
-
-type humano = object
-		var 
-			no : integer;
-			conyugue : humano;
-	end; 
-
-var
-	david : humano;
-
-begin 
-
-	writeln(david.nombre);
-
-	graficar_ts();
-
+program AddNums;
+    
+    type
+        vector = array [0..4] of string;
+        humano = object
+		    var 	
+			    nombre : string;
+			    arr : vector;
+		end; 
+        list = array [0..4] of humano;
+        
+    var 
+        arreglo : list;
+        
+begin
+        arreglo[0].nombre := 'holaaa';
+        arreglo[0].arr[0] := 'jejeje';
+        writeln(arreglo[0].nombre);
+        writeln(arreglo[0].arr[0]);
+    
 end.

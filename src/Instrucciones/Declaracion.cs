@@ -5,7 +5,6 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Globalization;
-using _OLC2_Proyecto1.src.Instrucciones.InstGlobales;
 
 namespace _OLC2_Proyecto1.src.Instrucciones
 {
@@ -14,112 +13,76 @@ namespace _OLC2_Proyecto1.src.Instrucciones
         public int line { get; set ; }
         public int column { get; set; }
 
-        private List<string> ids;
-        private string tipo;
+        private string idDec;
+        private object tipo;
         private Expresion valor;
         private bool constante;
 
-        public Declaracion(int line, int column, List<string> ids, string tipo, Expresion valor, bool constante)
+        public Declaracion(int line, int column, string idDec, object tipo, Expresion valor, bool constante)
         {
             this.line = line;
             this.column = column;
-            this.ids = ids;
+            this.idDec = idDec;
             this.tipo = tipo;
             this.valor = valor;
             this.constante = constante;
         }
 
-        public Declaracion(int line, int column, List<string> ids, string tipo)
+        public Declaracion(int line, int column, string idDec, object tipo)
         {
             this.line = line;
             this.column = column;
-            this.ids = ids;
+            this.idDec = idDec;
             this.tipo = tipo;
             this.valor = null;
             this.constante = false;
         }
 
 
-        public void execute(Entorno ent, ProgramClass programClass)
-        {   
-            if (this.ids.Count > 1)//cuando hay un listado de ids
+        public retorno execute(Entorno ent, ProgramClass programClass)
+        {
+            bool noExiste;
+            if (ent.nombreAmbito == "GLOBAL")
+                noExiste = !ent.existeID(this.idDec) && !programClass.existeIDProcFunc(this.idDec);
+            else
+                noExiste = !ent.existeID(this.idDec);
+
+            if (noExiste)
             {
-                string errores = "";
-                foreach (string id in this.ids)
+                if (valor != null)// de que no contenga valor
                 {
-                    bool noExiste;
-                    if (ent.nombreAmbito == "GLOBAL")
-                        noExiste = !ent.existeID(id) && !programClass.existeIDProcFunc(id);
-                    else
-                        noExiste = !ent.existeID(id);
-
-                    if (noExiste)
-                        ent.addVariable(getValorxDefecto(programClass), id, getTipo(programClass), this.line, this.column, false);
-                    else
-                        errores += "<tr>\n" +
-                        "\t<td>Error Semantico</td>\n" +
-                        "\t<td>El id: '" + id + "' ya esta en uso</td>\n" +
-                        "\t<td>" + this.line + "</td>\n" +
-                        "\t<td>" + this.column + "</td>\n</tr>\n|\n";
+                    retorno resultado = valor.getValorSintetizado(ent, programClass);
+                    if (this.tipo.ToString() != "")//varifica que sino es una constante
+                        if (getTipo(programClass) != resultado.type)//sino es una constante verifica que el los tipos sean iguales
+                            throw new Exception("<tr>\n" +
+                            "\t<td>Error Semantico</td>\n" +
+                            "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' a una variable de tipo '" + this.tipo + "'</td>\n" +
+                            "\t<td>" + this.line + "</td>\n" +
+                            "\t<td>" + this.column + "</td>\n</tr>\n\n");
+                        
+                    ent.addVariable(resultado.value, this.idDec, resultado.type, this.line, this.column, this.constante);// agrega la constamte
                 }
-
-                if (errores != "")
-                    throw new Exception(errores);
-
-            }
-            else if (this.ids.Count == 1)// cuando hay solo un id 
-            {
-                bool noExiste;
-                if (ent.nombreAmbito == "GLOBAL")
-                    noExiste = !ent.existeID(this.ids[0]) && !programClass.existeIDProcFunc(this.ids[0]);
                 else
-                    noExiste = !ent.existeID(this.ids[0]);
-
-                if (noExiste)
-                       
-                    if (valor != null)
-                    {
-                        retorno resultado = valor.execute(ent, programClass);
-                        if (this.tipo != "")//varifica que sino es una constante
-                            if (getTipo(programClass) != resultado.type)//sino es una constante verifica que el tipo del resultado sea igual al de la varaiable
-                                throw new Exception("<tr>\n" +
-                                "\t<td>Error Semantico</td>\n" +
-                                "\t<td>Tipo de datos incopatible, no se puede asignar una expresion de tipo '" + resultado.type + "' a una variable de tipo '" + this.tipo + "'</td>\n" +
-                                "\t<td>" + this.line + "</td>\n" +
-                                "\t<td>" + this.column + "</td>\n</tr>\n\n");
-
-                        ent.addVariable(resultado.value, this.ids[0], resultado.type, this.line, this.column, this.constante);
-
-                    }
-                    else
-                        ent.addVariable(getValorxDefecto(programClass), this.ids[0], getTipo(programClass), this.line, this.column, false);
-                else
-                    throw new Exception("<tr>\n" +
-                    "\t<td>Error Semantico</td>\n" +
-                    "\t<td>El id: '" + this.ids[0] + "' ya esta en uso</td>\n" +
-                    "\t<td>" + this.line + "</td>\n" +
-                    "\t<td>" + this.column + "</td>\n</tr>\n\n");
-                
-
+                    ent.addVariable(getValorxDefecto(ent, programClass), this.idDec, getTipo(programClass), this.line, this.column, false);// agrega la y las variables sin valor
             }
+            else
+                throw new Exception("<tr>\n" +
+                "\t<td>Error Semantico</td>\n" +
+                "\t<td>El id: '" + this.idDec + "' ya esta en uso</td>\n" +
+                "\t<td>" + this.line + "</td>\n" +
+                "\t<td>" + this.column + "</td>\n</tr>\n\n");
 
+
+            retorno ret;
+            ret.value = null;
+            ret.type = tiposPrimitivos.VOID;
+            return ret;
         }
-
         private tiposPrimitivos getTipo(ProgramClass programClass)
         {
-            tipo = this.tipo.ToLower();
-
-            if (tipo == "integer")
-                return tiposPrimitivos.INT;
-            else if (tipo == "real")
-                return tiposPrimitivos.REAL;
-            else if (tipo == "boolean")
-                return tiposPrimitivos.BOOLEAN;
-            else if (tipo == "string")
-                return tiposPrimitivos.STRING;
-            else
+            if (this.tipo is string)
             {
-                tiposPrimitivos type = programClass.getType(this.tipo);
+                tiposPrimitivos type = programClass.getType((string)this.tipo);
                 if (type != tiposPrimitivos.error)
                     return type;
                 else
@@ -128,28 +91,27 @@ namespace _OLC2_Proyecto1.src.Instrucciones
                     "\t<td>No se ah declarado ningun Type con el id " + "'" + this.tipo + "'" + "</td>\n" +
                     "\t<td>" + this.line + "</td>\n" +
                     "\t<td>" + this.column + "</td>\n</tr>\n\n");
-
             }
-                
-        }
-
-        private object getValorxDefecto (ProgramClass programClass)
-        {
-            tipo = this.tipo.ToLower();
-
-            if (tipo == "integer")
-                return int.Parse("0");
-            else if (tipo == "real")
-                return float.Parse("0.0", CultureInfo.GetCultureInfo("en-US"));
-            else if (tipo == "string")
-                return "";
-            else if (tipo == "boolean")
-                return bool.Parse("false");
+            else if (this.tipo is Arreglo)
+            {
+                return tiposPrimitivos.ARRAEGLO;
+            }
             else
             {
-                object valorType = programClass.getValorType(this.tipo);
-                if (valorType != null)
-                    return valorType;
+                return (tiposPrimitivos)this.tipo;
+            }
+            
+        }
+        private object getValorxDefecto (Entorno ent, ProgramClass programClass)
+        {
+            if (this.tipo is string)
+            {
+                object clonValor = programClass.getValorType((string)this.tipo);
+                if (clonValor != null)
+                    if (clonValor is Struct || clonValor is Arreglo)
+                        return clonValor;
+                    else
+                        return getValorPrimitivo((tiposPrimitivos)clonValor);
                 else
                     throw new Exception("<tr>\n" +
                     "\t<td>Error Semantico</td>\n" +
@@ -157,7 +119,28 @@ namespace _OLC2_Proyecto1.src.Instrucciones
                     "\t<td>" + this.line + "</td>\n" +
                     "\t<td>" + this.column + "</td>\n</tr>\n\n");
             }
+            else if (this.tipo is Arreglo)
+            {
+                Arreglo nvoArreglo = (Arreglo)this.tipo;
+                nvoArreglo.execute(ent, programClass);
+                return nvoArreglo;
+            }
+            else
+            {
+                return getValorPrimitivo((tiposPrimitivos)this.tipo);
+            }
                 
+        }
+        private object getValorPrimitivo(tiposPrimitivos type)
+        {
+            if (type == tiposPrimitivos.INT)
+                return int.Parse("0");
+            else if (type == tiposPrimitivos.REAL)
+                return float.Parse("0.0", CultureInfo.GetCultureInfo("en-US"));
+            else if (type == tiposPrimitivos.BOOLEAN)
+                return bool.Parse("false");
+            else //(type == tiposPrimitivos.STRING)
+                return "";
         }
     }
 }

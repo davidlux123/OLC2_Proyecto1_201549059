@@ -1,4 +1,5 @@
 ﻿using _OLC2_Proyecto1.src.Ambientes;
+using _OLC2_Proyecto1.src.Expresiones;
 using _OLC2_Proyecto1.src.Interfaces;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             this.column = column;
         }
 
-        public void execute(Entorno ent, ProgramClass programClass)
+        public retorno execute(Entorno ent, ProgramClass programClass)
         {
             string simbolosHTML = "<title>Tabla de Simbolos</title>\n\n" +
 
@@ -66,6 +67,10 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             else
                 MessageBox.Show("ERROR: el archivo C:\\compiladores2\\TablaSimbolos.HTM no existe :(");
 
+            retorno ret;
+            ret.value = null;
+            ret.type = tiposPrimitivos.VOID;
+            return ret;
         }
     }
 }

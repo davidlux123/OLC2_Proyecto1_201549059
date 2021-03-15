@@ -10,7 +10,7 @@ namespace _OLC2_Proyecto1.src.Ambientes
     public class Entorno
     {
         private Entorno anterior;
-        public string nombreAmbito { get; }
+        public string nombreAmbito { get; set; }
         private Hashtable variables;
 
         public Entorno(Entorno anterior, string nombreAmbito)
@@ -20,17 +20,31 @@ namespace _OLC2_Proyecto1.src.Ambientes
             variables = new Hashtable();
         }
 
+        public Entorno(Entorno anterior)
+        {
+            this.anterior = anterior;
+            this.variables = new Hashtable();
+        }
+
         public void addVariable(object valor, string id, tiposPrimitivos type, int linea, int columna, bool constante)
         { 
-            this.variables.Add(id, new Simbolo(valor, type,  linea, columna, constante));
-        } 
+            this.variables.Add(id, new Simbolo(id, valor, type,  linea, columna, constante));
+        }
+        public void addVariable(string id, Simbolo sim)
+        {
+            this.variables.Add(id, sim);
+        }
         public bool existeID(string id)
         {
             return this.variables.Contains(id);
         }
-        public bool isEmptyVars()
+        public bool existeIDGlobal(string id)
         {
-            return this.variables.Count == 0;
+            Entorno Entaux = this;
+            while (Entaux.anterior != null)
+                Entaux = Entaux.anterior;
+
+            return this.variables.Contains(id);
         }
         public Simbolo getVariable(string id)
         {

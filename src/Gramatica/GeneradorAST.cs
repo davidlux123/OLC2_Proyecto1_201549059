@@ -7,13 +7,19 @@ using System.Text;
 using System.IO;
 using System.Globalization;
 using System.Windows.Forms;
-using _OLC2_Proyecto1.src.Instrucciones.InstGlobales;
 using _OLC2_Proyecto1.src.Instrucciones.InstLocales;
 using _OLC2_Proyecto1.src.Instrucciones;
+using _OLC2_Proyecto1.src.Ambientes;
 
 namespace _OLC2_Proyecto1.src.Gramatica
 {
-    class GeneradorAST
+    public struct expPosArr
+    {
+        public string id;
+        public List<Expresion> posicion;
+    }
+
+    public class GeneradorAST
     {
         public List<string> Errores { get; set; }
         public List<Instruccion> Instrucciones { get; set; }
@@ -28,7 +34,8 @@ namespace _OLC2_Proyecto1.src.Gramatica
 
             this.arbolIrony = ArbolIrony;
             if (this.arbolIrony.Root != null)
-                generarAST(this.arbolIrony.Root);
+
+                this.Instrucciones = (List<Instruccion>)construirNodo(this.arbolIrony.Root);
         }
         public GeneradorAST(ParseTree ArbolIrony)
         {
@@ -36,11 +43,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
 
             this.arbolIrony = ArbolIrony;
             if (this.arbolIrony.Root != null)
-                generarAST(this.arbolIrony.Root);
-        }
-        private void generarAST(ParseTreeNode raizArbolIrony)
-        {
-            this.Instrucciones = (List<Instruccion>)construirNodo(raizArbolIrony);
+                this.Instrucciones = (List<Instruccion>)construirNodo(this.arbolIrony.Root);
         }
         private object construirNodo(ParseTreeNode actual)
         {
@@ -60,93 +63,189 @@ namespace _OLC2_Proyecto1.src.Gramatica
                  
                 foreach (ParseTreeNode hijo in actual.ChildNodes)
                 {
-                    object inst = construirNodo(hijo.ChildNodes[0]);
-                    if (inst is List<Instruccion>)
-                        Instrucciones.AddRange((List<Instruccion>)inst);
-                    else /*if (inst is Struct|| inst is Procedimiento || inst is Funcion)*/
-                        Instrucciones.Add((Instruccion)inst);
+                    Instrucciones.AddRange((List<Instruccion>)construirNodo(hijo.ChildNodes[0]));
                 }
 
                 return Instrucciones;
+            }
+            else if (nodeNameIsEqual(actual, "DECLARACIONTYPE"))
+            {
+                List<Instruccion> definiciones = new List<Instruccion>();
+                foreach (ParseTreeNode hijoVars in actual.ChildNodes[1].ChildNodes)
+                {
+                    definiciones.Add((Instruccion)construirNodo(hijoVars));
+                }
+                return definiciones;
+            }
+            else if (nodeNameIsEqual(actual, "DEFTYPE"))    
+            {
+                object TYPE = construirNodo(actual.ChildNodes[2].ChildNodes[0]);
+
+                if (TYPE is Struct)
+                {
+                    Struct type = (Struct)TYPE; 
+                    type.idStruct = getLexemeNode(actual.ChildNodes[0]);
+                    type.entStruct.nombreAmbito = getLexemeNode(actual.ChildNodes[0]);
+                    return type;
+                }
+                else if (TYPE is Arreglo)
+                {
+                    Arreglo type = (Arreglo)TYPE;
+                    type.idArreglo = getLexemeNode(actual.ChildNodes[0]);
+                    return type;
+                }
+                else
+                {
+                    return new Literal(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                        getLexemeNode(actual.ChildNodes[0]), TYPE);
+                }
+            }
+            else if (nodeNameIsEqual(actual, "ARRAY"))
+            {
+                List<Expresion[]> dimensiones = new List<Expresion[]>();
+                foreach (ParseTreeNode hijoVars in actual.ChildNodes[2].ChildNodes)
+                {
+                    dimensiones.Add((Expresion[])construirNodo(hijoVars));
+                }
+
+                return new Arreglo(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    construirNodo(actual.ChildNodes[5]), dimensiones);
+
+            }
+            else if (nodeNameIsEqual(actual, "DIMENSION"))
+            {
+                Expresion[] dimension = { (Expresion)construirNodo(actual.ChildNodes[0].ChildNodes[0]),
+                                          (Expresion)construirNodo(actual.ChildNodes[3].ChildNodes[0]) };
+                return dimension;
             }
             else if (nodeNameIsEqual(actual, "STRUCT"))
             {
                 List<Declaracion> variables = new List<Declaracion>();
 
-                foreach (ParseTreeNode hijoVars in actual.ChildNodes[5].ChildNodes)
+                foreach (ParseTreeNode hijoVars in actual.ChildNodes[2].ChildNodes)
                 {
-                    variables.Add((Declaracion)construirNodo(hijoVars.ChildNodes[0]));
+                    variables.AddRange((List<Declaracion>)construirNodo(hijoVars));
                 }
 
-                return new Struct(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
-                    getLexemeNode(actual.ChildNodes[1]), variables);
+                return new Struct(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1, variables);
             }
-            else if (nodeNameIsEqual(actual, "DECLARACIONES"))
+            else if (nodeNameIsEqual(actual, "VAR"))
             {
-                List<Instruccion> Declaraciones = new List<Instruccion>();
+                List<Declaracion> decs = new List<Declaracion>();
 
-                foreach (ParseTreeNode hijo in actual.ChildNodes)
+                foreach (ParseTreeNode idDecVar in actual.ChildNodes[0].ChildNodes)
                 {
-                    List<Instruccion> Variables = new List<Instruccion>();
-
-                    foreach (ParseTreeNode hijoVars in hijo.ChildNodes[1].ChildNodes)
-                    {
-                        Variables.Add((Instruccion)construirNodo(hijoVars));
-                    }
-                    Declaraciones.AddRange(Variables);
+                    decs.Add(new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                        getLexemeNode(idDecVar).Replace(",", ""), construirNodo(actual.ChildNodes[2])));
                 }
+                return  decs;
+            }
+            else if (nodeNameIsEqual(actual, "DECLARACION"))
+            {
+                List<Instruccion> Variables = new List<Instruccion>();
+                foreach (ParseTreeNode hijoVars in actual.ChildNodes[1].ChildNodes)
+                {
+                    object dec = construirNodo(hijoVars);
+                    if (dec is List<Declaracion>)
+                        Variables.AddRange((List<Declaracion>)dec);
+                    else
+                        Variables.Add((Instruccion)dec);
 
-                return Declaraciones;
+                }
+                return Variables;
             }
             else if (nodeNameIsEqual(actual, "CONSTANTE"))
             {
                 return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                    new List<string>() { getLexemeNode(actual.ChildNodes[0]) }, "",
-                    (Expresion)construirNodo(actual.ChildNodes[2].ChildNodes[0]), true);
+                    getLexemeNode(actual.ChildNodes[0]), "", (Expresion)construirNodo(actual.ChildNodes[2].ChildNodes[0]), true);
             }
             else if (nodeNameIsEqual(actual, "VARIABLE"))
             {
-                if (nodeNameIsEqual(actual.ChildNodes[0], "VAR"))//si la variable NO se asigna una expresion
-                {
-                    return construirNodo(actual.ChildNodes[0]);
-                }
-                else //si la variable se le asigna una expresion
-                {
-                    return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                    new List<string>() {getLexemeNode(actual.ChildNodes[0])}, getLexemeNode(actual.ChildNodes[2].ChildNodes[0]),
-                    (Expresion)construirNodo(actual.ChildNodes[4].ChildNodes[0]), false);
-                }
+                List<Declaracion> decs = new List<Declaracion>();
+
+                if (nodeNameIsEqual(actual.ChildNodes[0], "id"))
+                    if (actual.ChildNodes.Count == 5)
+                        decs.Add(new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                        getLexemeNode(actual.ChildNodes[0]), getLexemeNode(actual.ChildNodes[2].ChildNodes[0]),
+                        (Expresion)construirNodo(actual.ChildNodes[4].ChildNodes[0]), false));
+                    else //sino se le asigna una expresion
+                        decs.Add(new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                            getLexemeNode(actual.ChildNodes[0]), construirNodo(actual.ChildNodes[2])));
+                else//si viene un listado de ids
+                    foreach (ParseTreeNode idDecVar in actual.ChildNodes[0].ChildNodes)
+                        decs.Add(new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                            getLexemeNode(idDecVar).Replace(",", ""), construirNodo(actual.ChildNodes[2])));
+
+                return decs;
             }
-            else if (nodeNameIsEqual(actual, "VAR"))
+            else if (nodeNameIsEqual(actual, "TIPO"))
             {
-                if (nodeNameIsEqual(actual.ChildNodes[0], "id"))//si solo viene un id
-                    if (nodeNameIsEqual(actual.ChildNodes[2], "id"))//si el tipo es un id
-                        return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                        new List<string>() { getLexemeNode(actual.ChildNodes[0]) }, getLexemeNode(actual.ChildNodes[2]));
-                    else//si el tipo es un TIPO primitivo
-                        return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                        new List<string>() { getLexemeNode(actual.ChildNodes[0]) }, getLexemeNode(actual.ChildNodes[2].ChildNodes[0]));
-                else//de lo contrario viene un listado de ids
-                    if (nodeNameIsEqual(actual.ChildNodes[2], "id"))//si el tipo es un id
-                        return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                        (List<string>)construirNodo(actual.ChildNodes[0]), getLexemeNode(actual.ChildNodes[2]));
-                    else//si el tipo es un TIPO primitivo
-                        return new Declaracion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                        (List<string>)construirNodo(actual.ChildNodes[0]), getLexemeNode(actual.ChildNodes[2].ChildNodes[0]));
+                string tipo = getLexemeNode(actual.ChildNodes[0]);
+                if (nodeNameIsEqual(actual.ChildNodes[0], "id"))
+                    return tipo;
+                else if (tipo == "integer")
+                    return tiposPrimitivos.INT;
+                else if (tipo == "real")
+                    return tiposPrimitivos.REAL;
+                else if (tipo == "string")
+                    return tiposPrimitivos.STRING;
+                else //if (tipo == "boolean")
+                    return tiposPrimitivos.BOOLEAN;
             }
-            else if (nodeNameIsEqual(actual, "LISTAIDS"))
+            else if (nodeNameIsEqual(actual, "PROCFUNC"))
             {
-                List<string> ids = new List<string>();
-
-                foreach (ParseTreeNode hijo in actual.ChildNodes)
+                List<Parametro> parametros = new List<Parametro>();
+                foreach (ParseTreeNode hijoVars in actual.ChildNodes[2].ChildNodes)
                 {
-                    ids.Add(getLexemeNode(hijo).Replace(",", ""));
+                    parametros.AddRange((List<Parametro>)construirNodo(hijoVars));
                 }
 
-                return ids;
+                if (actual.ChildNodes.Count == 5)
+                {
+                    List<Instruccion> instrucciones = new List<Instruccion>();
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[3].ChildNodes)
+                    {
+                        Instrucciones.AddRange((List<Instruccion>)construirNodo(hijo));
+                    }
+                    Instrucciones.AddRange((List<Instruccion>)construirNodo(actual.ChildNodes[4].ChildNodes[1]));
+
+                    return new Funcion(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                        getLexemeNode(actual.ChildNodes[1]), tiposPrimitivos.VOID, instrucciones, parametros);
+                }
+                else if (actual.ChildNodes.Count == 7)
+                {
+                    List<Instruccion> instrucciones = new List<Instruccion>();
+                    foreach (ParseTreeNode hijo in actual.ChildNodes[5].ChildNodes)
+                    {
+                        Instrucciones.AddRange((List<Instruccion>)construirNodo(hijo));
+                    }
+                    Instrucciones.AddRange((List<Instruccion>)construirNodo(actual.ChildNodes[6].ChildNodes[1]));
+
+                    return new Funcion(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                        getLexemeNode(actual.ChildNodes[1]), construirNodo(actual.ChildNodes[4]), instrucciones, parametros);
+                }
 
             }
-            
+            else if (nodeNameIsEqual(actual, "PARAM"))
+            {
+                List<Parametro> decs = new List<Parametro>();
+
+                if (getLexemeNode(actual.ChildNodes[0]) == "var")
+                {
+                    decs.Add(new Parametro(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                            getLexemeNode(actual.ChildNodes[1]).Replace(",", ""), construirNodo(actual.ChildNodes[2]), true));
+                }
+                else
+                {
+                    foreach (ParseTreeNode idDecVar in actual.ChildNodes[0].ChildNodes)
+                    {
+                        decs.Add(new Parametro(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                            getLexemeNode(idDecVar).Replace(",", ""), construirNodo(actual.ChildNodes[2]), false));
+                    }
+                }
+                return decs;
+            }
+
             /*CONSTRUCCION DE INSTRUCCIONES LOCALES*/
             else if (nodeNameIsEqual(actual, "INSTSLOCAL"))
             {
@@ -165,21 +264,34 @@ namespace _OLC2_Proyecto1.src.Gramatica
             }
             else if (nodeNameIsEqual(actual, "ASIG"))
             {
-                if (actual.ChildNodes.Count == 3)
+                List<expPosArr> accesos = new List<expPosArr>();
+                foreach (ParseTreeNode hijo in actual.ChildNodes[0].ChildNodes)
                 {
-                    return new AsignacionVar(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
-                    getLexemeNode(actual.ChildNodes[0]), (Expresion)construirNodo(actual.ChildNodes[2].ChildNodes[0]));
+                    accesos.Add((expPosArr)construirNodo(hijo));
                 }
-                else if(actual.ChildNodes.Count == 4) 
+                return new Asignacion(actual.ChildNodes[1].Token.Location.Line + 1, actual.ChildNodes[1].Token.Location.Column + 1,
+                    accesos, (Expresion)construirNodo(actual.ChildNodes[2].ChildNodes[0]));
+            }
+            else if (nodeNameIsEqual(actual, "ACCESO"))
+            {
+                if (actual.ChildNodes.Count == 1)
                 {
-                    List<string> accesos = new List<string>();
+                    expPosArr nvo;
+                    nvo.id = getLexemeNode(actual.ChildNodes[0]);
+                    nvo.posicion = new List<Expresion>();
+                    return nvo; 
+                }
+                else if (actual.ChildNodes.Count == 2)
+                {
+                    List<Expresion> posicion = new List<Expresion>();
                     foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
                     {
-                        accesos.Add(getLexemeNode(hijo.ChildNodes[1]));
+                        posicion.Add((Expresion)construirNodo(hijo.ChildNodes[1].ChildNodes[0]));
                     }
-
-                    return new AsignacionStruct(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
-                        getLexemeNode(actual.ChildNodes[0]), accesos, (Expresion)construirNodo(actual.ChildNodes[3].ChildNodes[0]));
+                    expPosArr nvo;
+                    nvo.id = getLexemeNode(actual.ChildNodes[0]);
+                    nvo.posicion = posicion;
+                    return nvo;
                 }
             }
             else if (nodeNameIsEqual(actual, "WRITE"))
@@ -195,6 +307,62 @@ namespace _OLC2_Proyecto1.src.Gramatica
                     return new Write(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
                          new Primitivo(actual.ChildNodes[0].Token.Location.Line, 1, "", tiposPrimitivos.STRING), Writeln);
             }
+            else if (nodeNameIsEqual(actual, "IF"))
+            {
+                List<IF> elsifs = new List<IF>();
+                foreach (ParseTreeNode elsif in actual.ChildNodes[4].ChildNodes)
+                {
+                    elsifs.Add((IF)construirNodo(elsif));
+                }
+
+                return new IF(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    (Expresion)construirNodo(actual.ChildNodes[1].ChildNodes[0]), (List<Instruccion>)construirNodo(actual.ChildNodes[3].ChildNodes[1]),
+                    elsifs, (List<Instruccion>)construirNodo(actual.ChildNodes[5]));
+            }
+            else if (nodeNameIsEqual(actual, "ELSIF"))
+            {
+                return new IF(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    (Expresion)construirNodo(actual.ChildNodes[1].ChildNodes[0]), (List<Instruccion>)construirNodo(actual.ChildNodes[3].ChildNodes[1]));
+            }
+            else if (nodeNameIsEqual(actual, "ELSE"))
+            {
+                List<Instruccion> instsElse = new List<Instruccion>();
+                if (actual.ChildNodes.Count == 2)
+                {
+                    instsElse.AddRange((List<Instruccion>)construirNodo(actual.ChildNodes[1].ChildNodes[1]));
+                }
+                return instsElse;
+            }
+            else if (nodeNameIsEqual(actual, "FOR"))
+            {
+                return new For(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    getLexemeNode(actual.ChildNodes[1]), (Expresion)construirNodo(actual.ChildNodes[3].ChildNodes[0]), (Expresion)construirNodo(actual.ChildNodes[5].ChildNodes[0]),
+                    (List<Instruccion>)construirNodo(actual.ChildNodes[7].ChildNodes[1]));
+
+            }
+            else if (nodeNameIsEqual(actual, "WHILE"))
+            {
+                return new While(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    (Expresion)construirNodo(actual.ChildNodes[1].ChildNodes[0]), (List<Instruccion>)construirNodo(actual.ChildNodes[3].ChildNodes[1]));
+            }
+            else if (nodeNameIsEqual(actual, "REPEAT"))
+            {
+                return new Repeat(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    (Expresion)construirNodo(actual.ChildNodes[3].ChildNodes[0]), (List<Instruccion>)construirNodo(actual.ChildNodes[1].ChildNodes[1]));
+            }
+            else if (nodeNameIsEqual(actual, "LLAMADA"))
+            {
+                List<Expresion> vals = new List<Expresion>();
+
+                foreach (ParseTreeNode valores in actual.ChildNodes[1].ChildNodes)
+                {
+                    vals.Add((Expresion)construirNodo(valores.ChildNodes[0]));
+                }
+
+                return new LlamadaFunc(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                    getLexemeNode(actual.ChildNodes[0]), vals);
+            }
+
 
             /*CONSTRUCCION DE EXPRESIONES*/
             else if (nodeNameIsEqual(actual, "EXPARIT") || nodeNameIsEqual(actual, "E_ARIT"))
@@ -290,24 +458,48 @@ namespace _OLC2_Proyecto1.src.Gramatica
                     else if (nodeNameIsEqual(actual.ChildNodes[0], "true") || nodeNameIsEqual(actual.ChildNodes[0], "false"))
                         return new Primitivo(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
                             bool.Parse(getLexemeNode(actual.ChildNodes[0])), tiposPrimitivos.BOOLEAN);
-                    else if (nodeNameIsEqual(actual.ChildNodes[0], "id"))
-                        return new Acceso(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
-                            getLexemeNode(actual.ChildNodes[0]));
+                    else
+                    {
+                        List<expPosArr> accesos = new List<expPosArr>();
+                        foreach (ParseTreeNode hijo in actual.ChildNodes[0].ChildNodes)
+                        {
+                            accesos.Add((expPosArr)construirNodo(hijo));
+                        }
+                        return new Acceso(actual.ChildNodes[0].ChildNodes[0].ChildNodes[0].Token.Location.Line + 1, 0,
+                            accesos);
+                    }
                 }
                 else if (actual.ChildNodes.Count == 2)
                 {
-                    if (nodeNameIsEqual(actual.ChildNodes[1], "ACCSESOS"))
+                    if (nodeNameIsEqual(actual.ChildNodes[1], "POSICIONES"))
                     {
-                        List<string> accesos = new List<string>();
+                        List<Expresion> posicion = new List<Expresion>();
                         foreach (ParseTreeNode hijo in actual.ChildNodes[1].ChildNodes)
                         {
-                            accesos.Add(getLexemeNode(hijo.ChildNodes[1]));
+                            posicion.Add((Expresion)construirNodo(hijo.ChildNodes[1].ChildNodes[0]));
+                        }
+                        expPosArr nvo;
+                        nvo.id = getLexemeNode(actual.ChildNodes[0]);
+                        nvo.posicion = posicion;
+                        List<expPosArr> accesos = new List<expPosArr>();
+                        accesos.Add(nvo);
+
+                        return new Acceso(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                            accesos);
+
+                    }
+                    else if (nodeNameIsEqual(actual.ChildNodes[1], "VALSPARAMS"))
+                    {
+                        List<Expresion> vals = new List<Expresion>();
+
+                        foreach (ParseTreeNode valores in actual.ChildNodes[1].ChildNodes)
+                        {
+                            vals.Add((Expresion)construirNodo(valores.ChildNodes[0]));
                         }
 
-                        return new AccesoStruct(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
-                            getLexemeNode(actual.ChildNodes[0]), accesos);
+                        return new LlamadaFunc(actual.ChildNodes[0].Token.Location.Line + 1, actual.ChildNodes[0].Token.Location.Column + 1,
+                            getLexemeNode(actual.ChildNodes[0]), vals);
                     }
-
                 }
 
             }
@@ -324,8 +516,6 @@ namespace _OLC2_Proyecto1.src.Gramatica
         private string getLexemeNode(ParseTreeNode nodo){
             
             return nodo.Token.Text;
-
-
         }
 
         public void generarASTdot()
