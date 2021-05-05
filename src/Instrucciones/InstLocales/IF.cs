@@ -13,28 +13,28 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
         public int column { get ; set ; }
 
         private Expresion expCondicion;
-        private List<Instruccion> instsIf;
+        private Instruccion bloqueIf;
         private List<IF> listaElseifs;
-        private List<Instruccion> instsElse;
+        private Instruccion bloqueElse;
 
-        public IF(int line, int column, Expresion expCondicion, List<Instruccion> instsIf, List<IF> listaElseifs, List<Instruccion> instsElse)
+        public IF(int line, int column, Expresion expCondicion, Instruccion bloqueIf, List<IF> listaElseifs, Instruccion bloqueElse)
         {
             this.line = line;
             this.column = column;
             this.expCondicion = expCondicion;
-            this.instsIf = instsIf;
+            this.bloqueIf = bloqueIf;
             this.listaElseifs = listaElseifs;
-            this.instsElse = instsElse;
+            this.bloqueElse = bloqueElse;
         }
 
-        public IF(int line, int column, Expresion expCondicion, List<Instruccion> instsIf)
+        public IF(int line, int column, Expresion expCondicion, Instruccion bloqueIf)
         {
             this.line = line;
             this.column = column;
             this.expCondicion = expCondicion;
-            this.instsIf = instsIf;
-            this.listaElseifs = new List<IF>();
-            this.instsElse = new List<Instruccion>();
+            this.bloqueIf = bloqueIf;
+            this.listaElseifs = new List<IF>();//se inicializan vacias
+            this.bloqueElse = null;//bloque vacio
         }
 
 
@@ -48,28 +48,12 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
                 "\t<td>" + this.line + "</td>\n" +
                 "\t<td>" + this.column + "</td>\n</tr>\n\n");
 
-            string errors = "";
+            
             if ((bool)condi.value)
             {
-                foreach (Instruccion inst in this.instsIf)
-                {
-                    try
-                    {
-                        inst.execute(ent, programClass);
-                    }
-                    catch (Exception error)
-                    {
-                        errors += error.Message + "\n|\n";
-                    }
-                }
-
-                if (errors != "")
-                    throw new Exception(errors);
-
-                retorno ret;
-                ret.value = null;
-                ret.type = tiposPrimitivos.VOID;
-                return ret;
+                retorno valorRetorno = this.bloqueIf.execute(ent, programClass);
+                if (valorRetorno.value != null && valorRetorno.type != tiposPrimitivos.VOID)
+                    return valorRetorno;
             }
             else
             {
@@ -85,52 +69,26 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
 
                     if ((bool)condi.value)
                     {
-                        errors = "";
-                        foreach (Instruccion inst in If.instsIf)
-                        {
-                            try
-                            {
-                                inst.execute(ent, programClass);
-                            }
-                            catch (Exception error)
-                            {
-                                errors += error.Message + "\n|\n";
-                            }
-                        }
+                        retorno valorRetorno = If.bloqueIf.execute(ent, programClass);
+                        if (valorRetorno.value != null && valorRetorno.type != tiposPrimitivos.VOID)
+                            return valorRetorno;
 
-                        if (errors != "")
-                            throw new Exception(errors);
-
-                        retorno ret1;
-                        ret1.value = null;
-                        ret1.type = tiposPrimitivos.VOID;
-                        return ret1;
-
+                        return valorRetorno;// este return es muy importante ya que sin entra en algun else if no pase hacer el else 
                     }
                 }
 
-                errors = "";
-                foreach (Instruccion inst in this.instsElse)
+                if (bloqueElse != null)
                 {
-                    try
-                    {
-                        inst.execute(ent, programClass);
-                    }
-                    catch (Exception error)
-                    {
-                        errors += error.Message + "\n|\n";
-                    }
+                    retorno valorRet = this.bloqueElse.execute(ent, programClass);
+                    if (valorRet.value != null && valorRet.type != tiposPrimitivos.VOID)
+                        return valorRet;
                 }
-
-                if (errors != "")
-                    throw new Exception(errors);
-
-                retorno ret;
-                ret.value = null;
-                ret.type = tiposPrimitivos.VOID;
-                return ret;
-
             }
+
+            retorno ret;
+            ret.value = null;
+            ret.type = tiposPrimitivos.VOID;
+            return ret;
         }
     }
 }

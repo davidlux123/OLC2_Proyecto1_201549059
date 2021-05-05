@@ -14,14 +14,14 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
 
         private Expresion condicion;
 
-        private List<Instruccion> instruccionesWhile;
+        Instruccion bloqueWhile;
 
-        public While(int line, int column, Expresion condicion, List<Instruccion> instruccionesWhile)
+        public While(int line, int column, Expresion condicion, Instruccion bloqueWhile)
         {
             this.line = line;
             this.column = column;
             this.condicion = condicion;
-            this.instruccionesWhile = instruccionesWhile;
+            this.bloqueWhile = bloqueWhile;
         }
 
         public retorno execute(Entorno ent, ProgramClass programClass)
@@ -36,20 +36,12 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
                 "\t<td>" + this.column + "</td>\n</tr>\n\n");
             }
 
-            string errors = "";
             while ((bool)condi.value)
             {
-                foreach (Instruccion inst in this.instruccionesWhile)
-                {
-                    try
-                    {
-                        inst.execute(ent, programClass);
-                    }
-                    catch (Exception error)
-                    {
-                        errors += error.Message + "\n|\n";
-                    }
-                }
+                retorno valorRetorno = bloqueWhile.execute(ent, programClass);
+                if (valorRetorno.value != null && valorRetorno.type != tiposPrimitivos.VOID)
+                    return valorRetorno;
+
                 condi = condicion.getValorSintetizado(ent, programClass);
                 if (condi.type != tiposPrimitivos.BOOLEAN)
                 {
@@ -60,8 +52,6 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
                     "\t<td>" + this.column + "</td>\n</tr>\n\n");
                 }
             }
-            if (errors != "")
-                throw new Exception(errors);
 
             retorno ret;
             ret.value = null;

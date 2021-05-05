@@ -13,28 +13,21 @@ namespace _OLC2_Proyecto1.src.Instrucciones
         public int column { get ; set ; }
         public string idFuncion { get; set; }
         public object tipo { get; set; }
-        public List<Simbolo> parametros { get; set; }
-        public List<Instruccion> instruccionesFunc { get; set; }
-        private List<Parametro> instParams;
+        public List<Instruccion> decParams { get; set; }
+        public Instruccion bloque { get; set; }
 
-        public Funcion(int line, int column, string idFuncion, object tipo, List<Instruccion> instruccionesFunc, List<Parametro> instParams)
+        public Funcion(int line, int column, string idFuncion, object tipo, List<Instruccion> decParams, Instruccion bloque)
         {
             this.line = line;
             this.column = column;
             this.idFuncion = idFuncion;
             this.tipo = tipo;
-            this.parametros = new List<Simbolo>();
-            this.instruccionesFunc = instruccionesFunc;
-            this.instParams = instParams;
+            this.decParams = decParams;
+            this.bloque = bloque;
         }
 
         public retorno execute(Entorno ent, ProgramClass programClass)
         {
-            foreach (Parametro param in this.instParams)
-            {
-                this.parametros.Add(param.convertirSimbolo(programClass));
-            }
-
             if (!programClass.existeIDProcFunc(this.idFuncion) && ent.existeIDGlobal(this.idFuncion))
             {
                 programClass.addProcFunc(this.idFuncion, this);
@@ -50,7 +43,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones
 
             retorno ret;
             ret.value = null;
-            ret.type = tiposPrimitivos.VOID;
+            ret.type = tiposPrimitivos.VOID; 
             return ret;
         }
     }

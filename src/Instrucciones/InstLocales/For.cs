@@ -15,16 +15,16 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
         private string id;
         private Expresion valorAsig;
         private Expresion valorLim;
-        List<Instruccion> instsFor;
+        Instruccion bloqueFor;
 
-        public For(int line, int column, string id, Expresion valorAsig, Expresion valorLim, List<Instruccion> instsFor)
+        public For(int line, int column, string id, Expresion valorAsig, Expresion valorLim, Instruccion bloqueFor)
         {
             this.line = line;
             this.column = column;
             this.id = id;
             this.valorAsig = valorAsig;
             this.valorLim = valorLim;
-            this.instsFor = instsFor;
+            this.bloqueFor = bloqueFor;
         }
 
         public retorno execute(Entorno ent, ProgramClass programClass)
@@ -41,27 +41,15 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
             retorno lim = valorLim.getValorSintetizado(ent, programClass);
             if (simbo.type == tiposPrimitivos.INT && valor.type == tiposPrimitivos.INT && lim.type == tiposPrimitivos.INT)
             {
-                string errors = "";
                 for (int i = (int)valor.value; i <= (int)lim.value; i++)
                 {
                     simbo.valor = i;
                     ent.actualizaVariable(simbo.idVariable, simbo);
 
-                    foreach (Instruccion inst in this.instsFor)
-                    {
-                        try
-                        {
-                            inst.execute(ent, programClass);
-                        }
-                        catch (Exception error)
-                        {
-                            errors += error.Message + "\n|\n";
-                        }
-                    }
+                    retorno valorRetorno = bloqueFor.execute(ent, programClass);
+                    if (valorRetorno.value != null && valorRetorno.type != tiposPrimitivos.VOID)
+                        return valorRetorno;
                 }
-                if (errors != "")
-                    throw new Exception(errors);
-                
             }
             else
                 throw new Exception("<tr>\n" +

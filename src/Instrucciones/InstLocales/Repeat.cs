@@ -14,55 +14,44 @@ namespace _OLC2_Proyecto1.src.Instrucciones.InstLocales
 
         private Expresion condicion;
 
-        private List<Instruccion> instruccionesWhile;
+        private Instruccion bloque;
 
-        public Repeat(int line, int column, Expresion condicion, List<Instruccion> instruccionesWhile)
+        public Repeat(int line, int column, Expresion condicion, Instruccion bloque)
         {
             this.line = line;
             this.column = column;
             this.condicion = condicion;
-            this.instruccionesWhile = instruccionesWhile;
+            this.bloque = bloque;
         }
 
         public retorno execute(Entorno ent, ProgramClass programClass)
         {
             retorno condi = condicion.getValorSintetizado(ent, programClass);
             if (condi.type != tiposPrimitivos.BOOLEAN)
-            {
                 throw new Exception("<tr>\n" +
                 "\t<td>Error Semantico</td>\n" +
                 "\t<td>La expresion de la condicion es '" + condi.type + "' y debe ser de tipo BOOLEAN</td>\n" +
                 "\t<td>" + this.line + "</td>\n" +
                 "\t<td>" + this.column + "</td>\n</tr>\n\n");
-            }
-            string errors = "";
+
+            //aca se crearia un nvoEnotorno
+
             do
             {
-                foreach (Instruccion inst in this.instruccionesWhile)
-                {
-                    try
-                    {
-                        inst.execute(ent, programClass);
-                    }
-                    catch (Exception error)
-                    {
-                        errors += error.Message + "\n|\n";
-                    }
-                }
+                retorno valorRetorno = this.bloque.execute(ent, programClass);
+                if (valorRetorno.value != null && valorRetorno.type != tiposPrimitivos.VOID)
+                    return valorRetorno;
+
                 condi = condicion.getValorSintetizado(ent, programClass);
                 if (condi.type != tiposPrimitivos.BOOLEAN)
-                {
                     throw new Exception("<tr>\n" +
                     "\t<td>Error Semantico</td>\n" +
                     "\t<td>La expresion de la condicion es '" + condi.type + "' y debe ser de tipo BOOLEAN</td>\n" +
                     "\t<td>" + this.line + "</td>\n" +
                     "\t<td>" + this.column + "</td>\n</tr>\n\n");
-                }
 
             } while ((bool)condi.value);
 
-            if (errors != "")
-                throw new Exception(errors);
 
             retorno ret;
             ret.value = null;

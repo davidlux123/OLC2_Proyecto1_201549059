@@ -134,7 +134,9 @@ namespace _OLC2_Proyecto1.src.Gramatica
             NonTerminal TIPO = new NonTerminal("TIPO");
             NonTerminal BLOQUE = new NonTerminal("BLOQUE");
 
-            NonTerminal PROCFUNC = new NonTerminal("PROCFUNC");
+            NonTerminal FUNC = new NonTerminal("FUNC");
+            NonTerminal PROC = new NonTerminal("PROC");
+            NonTerminal BODY = new NonTerminal("BODY");
             NonTerminal PARAMS = new NonTerminal("PARAMS");
             NonTerminal PARAM = new NonTerminal("PARAM");
             NonTerminal DECLARACIONES = new NonTerminal("DECLARACIONES");
@@ -184,7 +186,8 @@ namespace _OLC2_Proyecto1.src.Gramatica
             INSTSGLOBAL.Rule = MakeStarRule(INSTSGLOBAL, INSTGLOBAL);
             INSTGLOBAL.Rule = DECLARACIONTYPE
                             | DECLARACION
-                            | PROCFUNC;
+                            | PROC
+                            | FUNC;
 
             /*declaracion de Types*/
             DECLARACIONTYPE.Rule = t_type + DEFTYPES;
@@ -241,8 +244,10 @@ namespace _OLC2_Proyecto1.src.Gramatica
                       | id;
 
             //                                   METODOS Y FUNCIONES
-            PROCFUNC.Rule = t_porc + id + parIzq + PARAMS + parDer + pntComa + DECLARACIONES + BLOQUE + pntComa 
-                          | t_func + id + parIzq + PARAMS + parDer + dosPnts + TIPO + pntComa + DECLARACIONES + BLOQUE + pntComa;
+            PROC.Rule = t_porc + id + parIzq + PARAMS + parDer + pntComa + BODY;
+            FUNC.Rule = t_func + id + parIzq + PARAMS + parDer + dosPnts + TIPO + pntComa + BODY;
+
+            BODY.Rule = DECLARACIONES + BLOQUE + pntComa;
 
             /*parametros*/
             PARAMS.Rule = MakeStarRule(PARAMS, coma ,PARAM);
@@ -264,8 +269,7 @@ namespace _OLC2_Proyecto1.src.Gramatica
                            | FOR + pntComa
                            | WHILE + pntComa
                            | REPEAT + pntComa
-                           | LLAMADA;
-
+                           | LLAMADA + pntComa;
             INSTLOCAL.ErrorRule = SyntaxError + pntComa;
 
             /*graficas TS*/
@@ -291,11 +295,6 @@ namespace _OLC2_Proyecto1.src.Gramatica
 
             REPEAT.Rule = t_repeat + BLOQUE + t_until + E;
 
-            /*llamada de metodo*/
-            LLAMADA.Rule = id + parIzq + VALSPARAMS + parDer;
-            VALSPARAMS.Rule = MakeStarRule(VALSPARAMS, coma , E);
-
-
             /*asignaciones*/
             ASIG.Rule = ACCESOS + asignacion + E;
             ACCESOS.Rule = MakeStarRule(ACCESOS, pnt, ACCESO);
@@ -306,6 +305,9 @@ namespace _OLC2_Proyecto1.src.Gramatica
             POSICIONES.Rule = MakePlusRule(POSICIONES, POSICION);
             POSICION.Rule = corchIzq + E + corchDer;
 
+            /*llamada de metodo*/
+            LLAMADA.Rule = id + parIzq + VALSPARAMS + parDer;
+            VALSPARAMS.Rule = MakeStarRule(VALSPARAMS, coma, E);
 
             //                                      EXPRESIONES LITERALES
             E.Rule = E_ARIT

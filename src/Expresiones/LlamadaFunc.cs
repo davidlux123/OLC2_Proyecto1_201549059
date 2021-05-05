@@ -27,53 +27,41 @@ namespace _OLC2_Proyecto1.src.Expresiones
         public retorno getValorSintetizado(Entorno ent, ProgramClass programClass)
         {
             Funcion fn = programClass.getProcFunc(this.id);//LLAMO LA FUNCION
-            if (fn == null)
-                throw new Exception("<tr>\n" +
-                "\t<td>Error Semantico</td>\n" +
-                "\t<td>El id de la funcion: '" + this.id + "' no existe</td>\n" +
-                "\t<td>" + this.line + "</td>\n" +
-                "\t<td>" + this.column + "</td>\n</tr>\n\n");
-
-            if (fn.parametros.Count != this.expParams.Count) // VRIFICO SI EL TAMAÑO DELOS PARAMETROS CON LA DECLARACIONES ES EL MISMO
+            if (fn != null)
             {
-                throw new Exception("<tr>\n" +
-                "\t<td>Error Semantico</td>\n" +
-                "\t<td>los parametros de la funcion No coinciden funcion: '" + this.id + "'</td>\n" +
-                "\t<td>" + this.line + "</td>\n" +
-                "\t<td>" + this.column + "</td>\n</tr>\n\n");
-            }
-
-            List<retorno> valsParams = new List<retorno>();
-            foreach (Expresion expParam in this.expParams) //EJECUTAMOS LOS VALORES DE LOS PARAMETROS
-            {
-                if (expParam is Acceso acceso)
-                    valsParams.Add(acceso.getReferenciaSintetizado(ent, programClass));
-                else 
-                    valsParams.Add(expParam.getValorSintetizado(ent, programClass));
-            }
-            
-            Entorno nvoEntorno = new Entorno(ent, fn.idFuncion); // NVO ENTORNO
-
-            for (int i = 0; i < fn.parametros.Count; i++)//VALIDACION Y DECLARACION DE PARAMETROS DE LA FUNCION CON SUS RESPECTIVOS VALORRES
-            {
-                if (fn.parametros[i].type == valsParams[i].type)
-                    if (validarTiposDatos(fn.parametros[i].valor, valsParams[i].value))
-                        declararParametro(fn.parametros[i], valsParams[i], nvoEntorno);
-                else
-                    throw new Exception("<tr>\n" +
-                    "\t<td>Error Semantico</td>\n" +
-                    "\t<td>El Paramentro '" + fn.parametros[i].type + "' no es compatible con el valor " + valsParams[i].type + " </td>\n" +
-                    "\t<td>" + this.line + "</td>\n" +
-                    "\t<td>" + this.column + "</td>\n</tr>\n\n");
-
-            }
-
-            foreach(Instruccion instFunc in fn.instruccionesFunc) //EJECTO SUS FUNCIONES
-            {
-                retorno valorRetorno = instFunc.execute(nvoEntorno, programClass);
-                if (instFunc is Exit)
+                if (fn.decParams.Count == this.expParams.Count) // VRIFICO EL TAMAÑO DE LOS VALORES LLAMADA DE FUNCION Y LAS DECLARACIONES SEAN ES EL MISMO
                 {
-                    if (validarRetornoFunc(valorRetorno, fn.tipo, programClass))
+                    List<retorno> valsParams = new List<retorno>();
+                    foreach (Expresion expParam in this.expParams) //EJECUTAMOS LOS VALORES DE LOS DE LLAMADA DE FUNCION
+                    {
+                        if (expParam is Acceso acceso)
+                            valsParams.Add(acceso.getReferenciaSintetizado(ent, programClass));
+                        else
+                            valsParams.Add(expParam.getValorSintetizado(ent, programClass));
+                    }
+
+                    Entorno nvoEntorno = new Entorno(ent, fn.idFuncion); //CREAMOS NVO ENTORNO
+
+                    foreach (Instruccion decParam in fn.decParams)// DECLARAMOS LOS PARAMETROS EN EL NUEVO ENTORNO
+                        decParam.execute(nvoEntorno, programClass);
+
+                    for (int i = 0; i < fn.decParams.Count; i++)
+                    {
+                        Declaracion decParam = (Declaracion)fn.decParams[i];
+                        Simbolo param = nvoEntorno.getVariable(decParam.idDec);//OBTENEMOS LA VARIABLE DECLARADA CON ANTERIORIDAD Y LA COMPARAMOS CON EL VALOR 
+                        if (param.type == valsParams[i].type)
+                            if (validarTiposDatos(param.valor, valsParams[i].value)) //validamos tipos
+                                actualizarParametro(param, valsParams[i], nvoEntorno);//actualizamos variables
+                            else
+                                throw new Exception("<tr>\n" +
+                                "\t<td>Error Semantico</td>\n" +
+                                "\t<td>El Paramentro '" + param.type + "' no es compatible con el valor " + valsParams[i].type + " </td>\n" +
+                                "\t<td>" + this.line + "</td>\n" +
+                                "\t<td>" + this.column + "</td>\n</tr>\n\n");
+                    }
+
+                    retorno valorRetorno = fn.bloque.execute(nvoEntorno, programClass); //EJECUTAMOS EL BLOQUE DE ISNTRUCCIONES
+                    if (validarRetornoFunc(valorRetorno, fn.tipo, programClass))// VALIDAMOS TIPOS DE DATOS, RETURN Y FUNC
                         return valorRetorno;
                     else
                         throw new Exception("<tr>\n" +
@@ -82,33 +70,33 @@ namespace _OLC2_Proyecto1.src.Expresiones
                         "\t<td>" + this.line + "</td>\n" +
                         "\t<td>" + this.column + "</td>\n</tr>\n\n");
                 }
+                else
+                    throw new Exception("<tr>\n" +
+                    "\t<td>Error Semantico</td>\n" +
+                    "\t<td>los parametros de la funcion No coinciden funcion: '" + this.id + "'</td>\n" +
+                    "\t<td>" + this.line + "</td>\n" +
+                    "\t<td>" + this.column + "</td>\n</tr>\n\n");
             }
-            retorno ret;
-            ret.value = null;
-            ret.type = tiposPrimitivos.VOID;
-            return ret;
+            else
+                throw new Exception("<tr>\n" +
+                "\t<td>Error Semantico</td>\n" +
+                "\t<td>El id de la funcion: '" + this.id + "' no existe</td>\n" +
+                "\t<td>" + this.line + "</td>\n" +
+                "\t<td>" + this.column + "</td>\n</tr>\n\n");
 
         }
        
-        public void declararParametro(Simbolo param,  retorno valparam, Entorno nvoEntorno)
+        public void actualizarParametro(Simbolo param,  retorno valparam, Entorno nvoEntorno)
         {
             if (valparam.value is Simbolo valSimbolo)
-            {
-                if (param.temporal)
+                if (param.isReference)
                 {
-                    nvoEntorno.addVariable(valSimbolo.idVariable, valSimbolo);
+                    nvoEntorno.addVariable(param.idVariable, valSimbolo);
+                    return;
                 }
-                else
-                {
-                    param.valor = valSimbolo.valor;
-                    nvoEntorno.addVariable(param.idVariable, param);
-                }
-            }
-            else
-            {
-                param.valor = valparam.value;
-                nvoEntorno.addVariable(param.idVariable, param);
-            }
+            
+            param.valor = valparam.value;
+            nvoEntorno.addVariable(param.idVariable, param);
         }
         public bool validarTiposDatos(object tipo1, object valParam)
         {

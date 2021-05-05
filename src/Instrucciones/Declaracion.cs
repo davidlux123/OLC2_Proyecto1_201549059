@@ -12,11 +12,11 @@ namespace _OLC2_Proyecto1.src.Instrucciones
     {
         public int line { get; set ; }
         public int column { get; set; }
-
-        private string idDec;
+        public string idDec { get; set; }
         private object tipo;
         private Expresion valor;
         private bool constante;
+        public bool isReferencia;
 
         public Declaracion(int line, int column, string idDec, object tipo, Expresion valor, bool constante)
         {
@@ -26,6 +26,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones
             this.tipo = tipo;
             this.valor = valor;
             this.constante = constante;
+            this.isReferencia = false;
         }
 
         public Declaracion(int line, int column, string idDec, object tipo)
@@ -36,8 +37,18 @@ namespace _OLC2_Proyecto1.src.Instrucciones
             this.tipo = tipo;
             this.valor = null;
             this.constante = false;
+            this.isReferencia = false;
         }
-
+        public Declaracion(int line, int column, string idDec, object tipo, bool isReferencia)
+        {
+            this.line = line;
+            this.column = column;
+            this.idDec = idDec;
+            this.tipo = tipo;
+            this.valor = null;
+            this.constante = false;
+            this.isReferencia = isReferencia;
+        }
 
         public retorno execute(Entorno ent, ProgramClass programClass)
         {
@@ -108,7 +119,12 @@ namespace _OLC2_Proyecto1.src.Instrucciones
             {
                 object clonValor = programClass.getValorType((string)this.tipo);
                 if (clonValor != null)
-                    if (clonValor is Struct || clonValor is Arreglo)
+                    if (clonValor is Struct cloneStruct)
+                    {
+                        cloneStruct.declararVars(programClass);//se declaran las variables del struct en su entorno
+                        return clonValor;
+                    }
+                    else if (clonValor is Arreglo)
                         return clonValor;
                     else
                         return getValorPrimitivo((tiposPrimitivos)clonValor);

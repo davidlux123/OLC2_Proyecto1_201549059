@@ -41,7 +41,7 @@ namespace _OLC2_Proyecto1
             this.acercaDeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.editorRichText = new System.Windows.Forms.RichTextBox();
             this.label1 = new System.Windows.Forms.Label();
-            ConsoleRichText = new System.Windows.Forms.RichTextBox();
+            this.ConsoleRichText = new System.Windows.Forms.RichTextBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -157,24 +157,24 @@ namespace _OLC2_Proyecto1
             // 
             // ConsoleRichText
             // 
-            ConsoleRichText.BackColor = System.Drawing.SystemColors.HighlightText;
-            ConsoleRichText.Enabled = false;
-            ConsoleRichText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
-            ConsoleRichText.ForeColor = System.Drawing.Color.Black;
-            ConsoleRichText.Location = new System.Drawing.Point(12, 626);
-            ConsoleRichText.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            ConsoleRichText.Name = "ConsoleRichText";
-            ConsoleRichText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
-            ConsoleRichText.Size = new System.Drawing.Size(1218, 206);
-            ConsoleRichText.TabIndex = 3;
-            ConsoleRichText.Text = "";
+            this.ConsoleRichText.BackColor = System.Drawing.SystemColors.HighlightText;
+            this.ConsoleRichText.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point);
+            this.ConsoleRichText.ForeColor = System.Drawing.Color.Black;
+            this.ConsoleRichText.Location = new System.Drawing.Point(12, 626);
+            this.ConsoleRichText.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            this.ConsoleRichText.Name = "ConsoleRichText";
+            this.ConsoleRichText.ReadOnly = true;
+            this.ConsoleRichText.ScrollBars = System.Windows.Forms.RichTextBoxScrollBars.ForcedBoth;
+            this.ConsoleRichText.Size = new System.Drawing.Size(1218, 206);
+            this.ConsoleRichText.TabIndex = 3;
+            this.ConsoleRichText.Text = "";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1248, 845);
-            this.Controls.Add(ConsoleRichText);
+            this.Controls.Add(this.ConsoleRichText);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.editorRichText);
             this.Controls.Add(this.menuStrip1);
@@ -204,7 +204,7 @@ namespace _OLC2_Proyecto1
         private System.Windows.Forms.ToolStripMenuItem acercaDeToolStripMenuItem;
         private System.Windows.Forms.RichTextBox editorRichText;
         private System.Windows.Forms.Label label1;
-        static public System.Windows.Forms.RichTextBox ConsoleRichText;
+        public  System.Windows.Forms.RichTextBox ConsoleRichText;
     }
 }
 

@@ -25,7 +25,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones
 
         }
 
-        private Struct(int line, int column, string idStruct, Entorno entStruct)
+        private Struct(int line, int column, string idStruct)
         {
             this.line = line;
             this.column = column;
@@ -33,14 +33,17 @@ namespace _OLC2_Proyecto1.src.Instrucciones
             this.entStruct = entStruct;
         }
 
-        public retorno execute(Entorno ent, ProgramClass programClass)
+        public void declararVars(ProgramClass programClass)
         {
             //se inicializan las variables del struct
             foreach (Declaracion declaracion in this.variables)
             {
                 declaracion.execute(this.entStruct, programClass);
             }
+        }
 
+        public retorno execute(Entorno ent, ProgramClass programClass)
+        {
             if (!programClass.existeIDtypes(this.idStruct))
             {
                 programClass.addType(this.idStruct, this);
@@ -62,7 +65,7 @@ namespace _OLC2_Proyecto1.src.Instrucciones
 
         public object Clone()
         {
-            Struct clone = new Struct(this.line, this.column,  this.idStruct, this.entStruct);
+            Struct clone = new Struct(this.line, this.column,  this.idStruct);
             return clone;
         }
 

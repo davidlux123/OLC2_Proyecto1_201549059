@@ -13,9 +13,9 @@ namespace _OLC2_Proyecto1.src.Ambientes
         public int linea { get; set; }
         public int columna { get; set; }
         public bool constante { get; set; }
-        public bool temporal { get; set; }
+        public bool isReference { get; set; }
 
-        public Simbolo(string idVariable ,object valor, tiposPrimitivos type, int linea, int columna, bool constante, bool temporal)
+        public Simbolo(string idVariable ,object valor, tiposPrimitivos type, int linea, int columna, bool constante, bool isReference)
         {
             this.idVariable = idVariable;
             this.valor = valor;
@@ -23,7 +23,7 @@ namespace _OLC2_Proyecto1.src.Ambientes
             this.linea = linea;
             this.columna = columna;
             this.constante = constante;
-            this.temporal = temporal;
+            this.isReference = isReference;
         }
 
         public Simbolo(string idVariable, object valor, tiposPrimitivos type, int linea, int columna, bool constante)
@@ -34,7 +34,7 @@ namespace _OLC2_Proyecto1.src.Ambientes
             this.linea = linea;
             this.columna = columna;
             this.constante = constante;
-            this.temporal = false;
+            this.isReference = false;
         }
     }
 }
